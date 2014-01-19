@@ -30,8 +30,8 @@
   Here are links to the updated documentation.  The text is pretty much as it
   was in the original files released by Timothy Budd but the code snippets are
   obtained automatically from the updated C++ source files.
-  + [[file:Doc/html/KaminInterpretersInC++.html][HTML]]
-  + [[file:Doc/KaminInterpretersInC++.pdf][pdf]]
+  + [[file:Doc/html/BuddKaminInterpreters.html][HTML]]
+  + [[file:Doc/BuddKaminInterpreters.pdf][pdf]]
 
 * Build and Test
   The default build setup is to compile with =g++= but =the interpreters= have
