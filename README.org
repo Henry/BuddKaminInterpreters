@@ -1,36 +1,38 @@
 #                            -*- mode: org; -*-
 #
-#+TITLE: *Timothy Budd's Kamin Interpreters in C++
+#+TITLE: *Timothy Budd's Kamin Interpreters in C++*
 #+AUTHOR: nil
 #+OPTIONS: author:nil email:nil ^:{}
 #+LaTeX_HEADER: \usepackage[parfill]{parskip}
 #+STARTUP: hidestars odd
 
 * Original Sources
-  + [[http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/impl/kamin/budd/][Source]]
-    I have played with Timothy Budd's C++ versions of the Kamin interpreters on
-    and off for many years and find them interesting and educational.  However
-    they have been languishing in the unexplored depths of the Internet for too
-    long and it is time they were resurrected and updated for another generation
-    of programming linguists to learn from.
+  + [[http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/impl/kamin/budd/]]
+  I have played with Timothy Budd's C++ versions of the Kamin interpreters on
+  and off for many years and find them interesting and educational.  However
+  they have been languishing in the unexplored depths of the Internet for too
+  long and it is time they were resurrected and updated for another generation
+  of programming linguists to learn from.
 
-    The code is reformatted and updated to compile without warning or error with
-    the latest standard C++ compilers and added tests derived from the examples
-    supplied by Kamin for his original Pascal interpreters.  Also tags have been
-    added to code sections so they may be automatically included in the
-    documentation without manually copying the relevant sections into the LaTeX
-    source files.  I couple of bugs have been found and corrected but more major
-    work on testing and debugging the RAII memory management is required which
-    is the next major job.
+  The code is reformatted and updated to compile without warning or error with
+  the latest standard C++ compilers and added tests derived from the examples
+  supplied by Kamin for his original Pascal interpreters.  Also tags have been
+  added to code sections so they may be automatically included in the
+  documentation without manually copying the relevant sections into the LaTeX
+  source files.  I couple of bugs have been found and corrected but more major
+  work on testing and debugging the RAII memory management is required which is
+  the next major job.
 
-    Currently the code formatting in the HTML version of the documentation is
-    not great and a bit more tweaking of the tex4ht config file is needed.
+  Currently the code formatting in the HTML version of the documentation is not
+  great and a bit more tweaking of the tex4ht config file is needed.
+
 * Documentation
   Here are links to the updated documentation.  The text is pretty much as it
   was in the original files released by Timothy Budd but the code snippets are
   obtained automatically from the updated C++ source files.
   + [[http://henry.github.com/BuddKaminInterpreters/Doc/html/KaminInterpretersInC++.html][HTML]]
   + [[http://henry.github.com/BuddKaminInterpreters/Doc/KaminInterpretersInC++.pdf][pdf]]
+
 * Build and Test
   The default build setup is to compile with =g++= but =the interpreters= have
   also been tested with =clang++= and any other standard C++ compiler should be
