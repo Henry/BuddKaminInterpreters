@@ -32,7 +32,7 @@
   obtained automatically from the updated C++ source files.
   + [[file:Doc/html/BuddKaminInterpreters.html][HTML]]
   + [[file:Doc/BuddKaminInterpreters.pdf][pdf]]
-  + [[file:Doc/TODO.html][TODO]]
+  + [[file:TODO.html][TODO]]
 * Build and Test
   The default build setup is to compile with =g++= but =the interpreters= have
   also been tested with =clang++= and any other standard C++ compiler should be
