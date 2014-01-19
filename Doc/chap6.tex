@@ -1,0 +1,73 @@
+\chapter{The CLU interpreter}
+
+The CLU interpreter is created by introducing a new datatype, the cluster,
+and three new types of functions.  Constructors create new instances of a
+cluster, selectors access a portion of a cluster state, and modifiers change
+a portion of a cluster state.  Figure~\ref{cluhier} shows the class
+hierarchy for the classes added in this chapter.
+
+\setlength{\unitlength}{5mm}
+\begin{figure}
+    \begin{picture}(25,10)(-4,-5)
+        \put(-3.5,0){\sf Expression}
+        \put(0,0.2){\line(1,0){1}}
+        \put(1,0){\sf Function}
+        \put(0,0.2){\line(1,-2){1}}
+        \put(1,-2){\sf Cluster}
+        \put(4,0.2){\line(1,-2){1}}
+        \put(5,-2){\sf BinaryFunction}
+        \put(9.5,-1.8){\line(1,0){1}}
+        \put(10.5,-2){\sf Modifier}
+        \put(4,0.2){\line(1,2){1}}
+        \put(5,2){\sf UnaryFunction}
+        \put(9.5,2.2){\line(1,0){1}}
+        \put(10.5,2){\sf Selector}
+        \put(4,0.2){\line(1,0){1}}
+        \put(5,0){\sf Constructor}
+        \put(4,0.2){\line(1,4){1}}
+        \put(5,4){\sf ClusterDef}
+    \end{picture}
+    \caption{Class Hierarchy for the CLU interpreter}
+    \label{cluhier}
+\end{figure}
+
+\section{Clusters}
+
+A cluster simply encapsulates a series of names and values, hiding them from
+normal examination.  The most natural way to do this is for a cluster to
+maintain an environment (Figure~\ref{CLUCluster}).  The predicate {\sf
+    isCluster} returns this environment value.
+%
+\includecode{clu.C}{CLUCluster}
+{The definition of a cluster value}
+
+To create a cluster requires a constructor function.  The constructor is
+provided with a list of names of the elements in the internal representation of
+the cluster, and simply insures that the arguments it is provided with match in
+number of the names it maintains.
+
+\section{Selectors and Modifiers}
+
+To access or modify the elements of a constructor requires functions called
+selectors or modifiers.  Each of these maintain as their state the name of the
+field they are responsible for.  When invoked with a constructor, the access or
+change their given field.
+%
+\includecode{clu.C}{CLUSelectorModifier}
+{Selectors and Modifiers for clusters}
+
+\section{Defining clusters}
+
+It thus remains only to give the (rather lengthy) definition of the function
+that generates constructor information from the textual description.  (We do not
+say generates clusters themselves, for that is the responsibility of the
+constructor functions).  This function is shown in Figure~\ref{CLUClusterDef}.
+It rips apart a cluster definition and does the right things (need a better
+description here, but I don't have time to write it now).  (Need to point out
+that cluster functions have an internal and an external name, and these are put
+of different environments).  (I suppose an alternative would have been to
+introduce a new datatype for two part names, which when evaluated would look up
+their second part in the cluster provided by their first part).
+%
+\includecode{clu.C}{CLUClusterDef}
+{The cluster recognition function}

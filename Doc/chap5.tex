@@ -1,0 +1,89 @@
+\chapter{The SASL interpreter}\label{sasl}
+
+The SASL interpreter is largely constructed by removing features from the Scheme
+interpreter, such as while loops and so on, and changing the implementation of
+the {\sf cons} function to add delayed evaluation.  Figure~\ref{saslhier} shows
+the class hierarchy for the classes added in this chapter.
+
+\setlength{\unitlength}{5mm}
+\begin{figure}
+    \begin{picture}(25,10)(-4,-5)
+        \put(-3.5,0){\sf Expression}
+        \put(0,0.2){\line(1,0){1}}
+        \put(1,0){\sf Function}
+        \put(0,0.2){\line(1,-2){1}}
+        \put(1,-2){\sf Thunk}
+        \put(4,0.2){\line(1,-2){1}}
+        \put(5,-2){\sf UserFunction}
+        \put(9.5,-1.8){\line(1,0){1}}
+        \put(10.5,-2){\sf LazyFunction}
+        \put(4,0.2){\line(1,2){1}}
+        \put(5,2){\sf SaslConsFunction}
+        \put(4,0.2){\line(1,0){1}}
+        \put(5,0){\sf LambdaFunction}
+    \end{picture}
+    \caption{Class Hierarchy for expressions in the SASL interpreter}
+    \label{saslhier}
+\end{figure}
+
+\subsection{Thunks}
+
+Delayed evaluation is provided by adding a new expression type, called the {\em
+    thunk}.  Figure~\ref{SASLThunk} shows the data structure used to represent
+this type of value.  Every thunk maintains a boolean value indicating whether
+the thunk has been evaluated yet, an expression (representing either the
+unevaluated or evaluated expression, depending upon the state of the boolean
+flag), and a context in which the expression is to be evaluated.  Thunks print
+either as three dots, if they have not yet been evaluated, or as the printed
+representation of their value, if they have.
+%
+\includecode{sasl.C}{SASLThunk}
+{Definition of Thunks}
+%
+\includecode{sasl.C}{SASLThunkTouch}
+{Definition of Thunk touch}
+
+Here we finally see an overridden definition for the method {\em touch}.  You
+will recall that this method was defined in Chapter 1, and that all other
+expressions merely return their value as the result of this expression.  Thunks,
+on the other hand, will evaluate themselves if touched, and then return their
+new evaluated result.  With the addition of this feature many of the definitions
+we have presented in earlier chapters, such as the definitions of {\sf car} and
+{\sf cdr}, hold equally well when given thunks as arguments.
+
+Since thunks can represent lists, symbols, integers and so on, the predicate
+methods {\sf isSymbol} and the like must be redefined as well.  If the thunk
+represents an evaluated value, these simply return the result of testing that
+value (Figure~\ref{SASLThunkPredicates}).
+%
+\includecode{sasl.C}{SASLThunkPredicates}
+{Thunk predicates}
+%
+\includecode{sasl.C}{SASLThunkEval}
+{Thunk eval}
+
+\section{Lazy Cons}
+
+The SASL cons function differs from the Scheme version in producing a list node
+containing a pair of thunks, rather than a pair of values
+(Figure~\ref{SaslConsFunction}).  Class {\sf SaslConsFunction} must now be a
+subclass of {\sf Function} and not {\sf BinaryFunction}, because it must grab
+its arguments before they are evaluated.  Thus it must itself check to see that
+only two arguments are passed to the function.
+%
+\includecode{sasl.C}{SaslConsFunction}
+{The Sasl Lazy Cons function}
+
+\section{Lazy User Functions}
+
+User defined functions must be provided with lazy evaluation semantics as well.
+This is accomplished by defining a new class {\sf LazyFunction}
+(Figure~\ref{SASLLazyFunction}).  Lazy functions act just like user functions
+from previous chapters, only they do not evaluate their arguments.  Thus the
+function body is evaluated by the method {\sf apply}, rather than passing the
+evaluated arguments on to the method {\sf applyWithArgs}.  The lambda function
+from the previous chapter is modified to produce an instance of {\sf
+    LazyFunction}, rather than {\sf UserFunction}.
+%
+\includecode{sasl.C}{SASLLazyFunction}
+{The implementation of lazy functions}

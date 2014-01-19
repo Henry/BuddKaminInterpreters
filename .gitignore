@@ -11,13 +11,6 @@ platforms
 # Ignore all object files
 *.o
 
-# Ignore library files
-*.so
-
-# Ignore generated doc files
-*.pdf
-*.tex
-
 # Ignore all run logs
 *.log
 *.out

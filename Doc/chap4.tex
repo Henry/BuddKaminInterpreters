@@ -1,0 +1,24 @@
+\chapter{The Scheme Interpreter}
+
+After all the code required to generate the APL interpreter of Chapter 3, the
+Scheme interpreter is simplicity in itself.  Of course, this has more to do with
+the similarity of Scheme to the basic Lisp interpreter of Chapter 2 than with
+any differences between APL and Scheme.
+
+To implement Scheme it is only necessary to provide an implementation of the
+lambda function.  This is accomplished by the class {\sf Lambda}, shown in
+Figure~\ref{SchemeLambdaFunction}.  The actual implementation of lambda uses the
+same class {\sf UserFunction} we have seen in previous chapters.
+%
+\includecode{scheme.C}{SchemeLambdaFunction}
+{The class Lambda}
+
+Initialization of the Scheme interpreter differs slightly from the code used to
+initialize the Lisp interpreter (Figure~\ref{SchemeInitialize}).  The {\sf
+    define} command is no longer recognized, having been replaced by the {\sf
+    set}/{\sf lambda} pair.  The built-in arithmetic functions are now considred
+to be global symbols, and not value-ops.  Indeed, there are no comands or
+value-ops in this language.
+%
+\includecode{scheme.C}{SchemeInitialize}
+{Initialization of the Scheme Interpreter}

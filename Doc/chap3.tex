@@ -1,0 +1,232 @@
+\chapter{The APL Interpreter}
+
+My version of the APL interpreter differs somewhat from that provided by Kamin:
+\begin{itemize}
+    \item My version will recognize arbitrary rank (dimension) arrays, not
+    simply scalar, vector and two dimensional arrays.  (Although currently it is
+    only able to print those three types).
+    \item The C++ version of the interpreter recognizes vector constants without
+    the necessity for quoting them, as in (resize (3 4) (indx 12)).
+    \item I have eliminated the if and while statements, thus forcing
+    programmers into a more ``APL'' style of thought.
+    \item My version of catenation works now for values of arbitrary
+    dimensionality.  (Transpose and print are the only two functions that limit
+    the dimensionality of their arguments).
+\end{itemize}
+
+Despite the APL interpreter being larger than any other interpreter, I think
+that the addition of a few more functions could give the student an even better
+feel for the language, as well as providing a smooth transition to functional
+programming.  Specifically, I think reduction should be defined as a functional,
+and inner and outer products added as operations.  I have not done this as yet,
+however.
+
+Figure~\ref{aplhier} shows the class hierarchy for the classes introduced in
+this chapter.
+
+\setlength{\unitlength}{5mm}
+\begin{figure}
+    \begin{picture}(25,10)(-4,-5)
+        \put(-3.5,0){\sf Expression}
+        \put(0,0.2){\line(1,0){1}}
+        \put(1,0){\sf Function}
+        \put(0,0.2){\line(1,-2){1}}
+        \put(1,-2){\sf APLValue}
+        \put(4,0.2){\line(1,-2){1}}
+        \put(5,-2){\sf BinaryFunction}
+        \put(9.5,-1.8){\line(1,0){1}}
+        \put(10.5,-2){\sf APLBinaryFunction}
+        \put(4,0.2){\line(1,2){1}}
+        \put(5,2){\sf UnaryFunction}
+        \put(9.5,2.2){\line(1,0){1}}
+        \put(10.5,2){\sf APLUnaryFunction}
+        \put(16,2.2){\line(1,0){1}}
+        \put(17,2){\sf RavelFunction}
+        \put(16,2.2){\line(1,1){1}}
+        \put(17,3){\sf ShapeFunction}
+        \put(16,2.2){\line(1,2){1}}
+        \put(17,4){\sf APLReduction}
+        \put(16,2.2){\line(1,-1){1}}
+        \put(17,1){\sf IndexFunction}
+        \put(16,2.2){\line(1,3){1}}
+        \put(17,5){\sf TransposeFunction}
+        \put(16,-1.8){\line(1,0){1}}
+        \put(17,-2){\sf RestructFunction}
+        \put(16,-1.8){\line(1,1){1}}
+        \put(17,-1){\sf CompressFunction}
+        \put(16,-1.8){\line(1,-1){1}}
+        \put(17,-3){\sf APLScalarFunction}
+        \put(16,-1.8){\line(1,-2){1}}
+        \put(17,-4){\sf CatenationFunction}
+        \put(16,-1.8){\line(1,-3){1}}
+        \put(17,-5){\sf SubscriptionFunction}
+    \end{picture}
+    \caption{The APL interpreter class hierarchy}\label{aplhier}
+\end{figure}
+
+\section{APL Values}
+
+The APL interpreter manipulates APL values, which are defined by the data type
+{\sf APLValue} (Figure~\ref{APLValue}).  An APL value represents a integer
+rectilinear array.  Internally, such a value is represented by a list that
+maintains the shape (extent along each dimension) and a vector of integer
+values.  The length of the shape list provides the rank (dimensionality) of the
+data value.  The product of the values in the shape indicates the number of
+elements in the array, except in the case of scalar values, which have an empty
+shape array.
+%
+\includecode{apl.C}{APLValue}
+{The Representation for APL Values}
+
+APL values are stored in what is called {\em ravel-order}.  This is what in some
+other languages is called row-major order.
+
+The methods defined for APL values can be used to determine the number of
+elements contained in the structure ({\sf size}), obtain the shape of the value
+({\sf shape}), obtain the shape at any given dimension ({\sf shapeAt}), obtain
+the value at any given ravel-order position ({\sf at}), and finally change the
+value at any position ({\sf atPut}).
+
+\section{The APL Reader}
+
+The APL reader is modified so that individual scalar values and vectors of
+integers are recognized as APL values.  The class definition for {\sf APLreader}
+is shown in Figure~\ref{APLreader}, and the code for the two auxiliary functions
+in the next figure.
+%
+\includecode{apl.C}{APLreader}
+{The APL reader}
+%
+\includecode{apl.C}{readAPLscalar}
+{The APL reader functions}
+
+\section{APL Functions}
+
+The implementation of the APL functions is simplified by the addition of two
+auxiliary classes, {\sf APLUnary} and {\sf APLBinary}.  In addition to checking
+that the right number of arguments are provided to a function application, these
+check to insure that the arguments are APL values \footnote{A largely gratuitous
+    move, since the user has no way of creating anything other than an APL
+    value.  Still, it doesn't do any harm to be careful.} and invoke yet another
+virtual function {\sf applyOp}, to perform the actual calculation.
+
+\subsection{Scalar Functions}
+
+By far the largest class of APL functions are the so-called {\em scalar
+    functions}.  These are the conventional arithmetic and logical functions,
+such as addition and multiplication, extended in the natural way to arrays.  The
+only complication in the implementation of these values concerns what is called
+{\em scalar extension}.  That is, a scalar value can be used as either the left
+or right argument to a scalar function, and it is treated as if it were an
+entire array of the correct dimensionality to match the other argument.  Since
+scalar extension can occur with either the left or right argument, the code for
+scalar functions divides naturally into three cases.
+
+Scalar functions are implemented using a single class by making use, as we have
+done before, of an instance variable that contains a pointer to a integer
+function that generates an integer result.  The class {\sf APLscalarFunction}
+and the method {\sf applyOp} are shown in Figure~\ref{APLScalarFunctionApply}.
+Note that the same functions used in the previous interpreters can be used in
+the construction of the APL scalar functions.
+%
+\includecode{apl.C}{APLScalarFunctionApply}
+{APL Scalar Functions}
+
+\subsection{Reduction}
+
+For each scalar function there is an associated reduction function.\footnote{The
+    statement is true of real APL.  The Kamin interpreters do not implement
+    reductions with relational operators, which are, however, not particularly
+    useful.}  Reduction in these interpreters always occurs along the last
+dimension.  Thus to compute the size of a new value is suffices to remove the
+last dimension value.  This also simplifies the generation of the new values,
+since the argument array can be processed in units as long as the final
+dimension.  As with the scalar functions, there is one class defined for all the
+reductions, with each instance of this class maintaining the particular scalar
+function being used for the reduction operations.  Figure~\ref{APLReduction}
+shows the code used in computing the APL reduction function.
+%
+\includecode{apl.C}{APLReduction}
+{Implementation of the APL reduction function}
+
+\subsection{Compression}
+
+Compression, like reduction, operates on the last dimension of a higher order
+array, changing its extent to that of the number of one elements in the
+left-argument vector.  The length of the left argument vector must match the
+extent of the last dimension of the right argument.  The compression function
+(Figure~\ref{APLCompressionFunctionApply}) first computes the number of one
+elements in the left argument, then iterates over the right argument generating
+the new values.
+%
+\includecode{apl.C}{APLCompressionFunctionApply}
+{The Compression function}
+
+\subsection{Shape and Reshape}
+
+The {\sf shape} function merely copies the size on its argument into a new APL
+value.  The reshape function ({\sf restruct}) generates a new value with a size
+given by the left argument, which must be a vector, using elements from the
+right argument, recycling over the ravel ordering of the right argument multiple
+times if necessary.  The implementation of these functions is shown in
+Figure~\ref{APLShapeFunctionApply} and ref{APLRestructFunctionApply}.
+%
+\includecode{apl.C}{APLShapeFunctionApply}
+{The shape function}
+%
+\includecode{apl.C}{APLRestructFunctionApply}
+{The reshape function}
+
+\subsection{Ravel and Index}
+
+The ravel function (Figure~\ref{APLRavelFunctionApply}) merely takes an argument
+of arbitrary dimensionality and returns the values as a vector.  The index
+function (called iota in real APL) (Figure~\ref{APLIndexFunctionApply}) takes a
+scalar value and returns a vector of numbers from 1 to the argument value.
+%
+\includecode{apl.C}{APLRavelFunctionApply}
+{Ravel}
+%
+\includecode{apl.C}{APLIndexFunctionApply}
+{Index}
+
+\subsection{Catenation}
+
+The catenation function joins two arrays along their last dimension.  They must
+match in all other dimensions.  To build the new result first a row from the
+first array is copies into the final array, then a row from the second array,
+then another row from the first, followed by another row from the second, and so
+on until all rows from each argument have been used.
+%
+\includecode{apl.C}{APLCatenationFunctionApply}
+{Implementation of the Catenation function}
+
+\subsection{Transpose}
+
+While real APL defines transpose for arbitrary dimension arrays, the transpose
+presented here works only for arrays of dimension two or less.  For vector and
+scalars the transpose does nothing.  Thus the only code required
+(Figure~\ref{APLTransposeFunctionApply}) is to take the transpose of a two
+dimensional array.
+%
+\includecode{apl.C}{APLTransposeFunctionApply}
+{The Transpose Function}
+
+\subsection{Subscription}
+
+The Pascal interpreter provided by Kamin applies subscription to the first
+dimension of a multidimension value.  In order to be consistent with the other
+functions, my version does subscription along the last dimension.  Neither is
+exactly the same as the real APL version.  The subscription code is shown in
+Figure~\ref{APLSubscriptFunction}.
+%
+\includecode{apl.C}{APLSubscriptFunction}
+{The Subscription function}
+
+\section{Initialization of the APL interpreter}
+
+The initialization code for the APL interpreter is shown in
+Figure~\ref{APLInitialize}.
+%
+\includecode{apl.C}{APLInitialize}
+{APL interpreter initialization}

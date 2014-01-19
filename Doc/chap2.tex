@@ -1,0 +1,126 @@
+\chapter{The Lisp Interpreter}
+
+The interpreter for Lisp differs only slightly from that of Chapter one.  The
+reader/parser is modified so as to recognize quoted constants, two new global
+variables ({\sf T} and {\sf nil}) are added, and a number of new value-ops are
+defined.  In all other respects it is the same.  Figure~\ref{chap2hier} shows
+the class hierarchy for the expression classes added in chapter 2.
+
+\setlength{\unitlength}{5mm}
+\begin{figure}
+\begin{picture}(16,5)(-4,-3)
+\put(-3.5,0){\sf Expression}
+\put(0,0.2){\line(1,0){1}}
+\put(1,0){\sf Function}
+\put(0,0.2){\line(1,-1){1}}
+\put(1,-1){\sf QuotedConstant}
+\put(4,0.2){\line(1,0){1}}
+\put(5,0){\sf BinaryFunction}
+\put(4,0.2){\line(1,3){1}}
+\put(5,3){\sf UnaryFunction}
+\put(9.5,3.2){\line(1,0){1}}
+\put(10.5,3){\sf BooleanUnary}
+\put(9.5,0.2){\line(1,1){1}}
+\put(10.5,1){\sf IntegerBinaryFunction}
+\put(9.5,0.2){\line(1,-1){1}}
+\put(10.5,-1){\sf BooleanBinaryFunction}
+\end{picture}
+\caption{Classes added in Chapter Two}\label{chap2hier}
+\end{figure}
+
+\section{The Lisp reader}
+
+The Lisp reader is created by subclassing from the base class {\sf Reader}
+(Figure~\ref{LispReader}).  The only change is to modify the method {\sf
+    readExpression} to check for leading quote marks.  If no mark is found,
+execution is as in the default case.  If a quote mark is found, the character
+pointer is advanced and the following expression is turned into a quoted
+constant.  Note that no checking is performed on this expression.  This permits
+symbols, even separators, to be treated as data.  That is, '; is a quoted
+symbol, even though the semicolon itself is not a legal symbol.
+%
+\includecode{lisp.h}{LispReader}
+{The Lisp reader/parser}
+%
+\includecode{lispPrimitives.C}{LispReaderImpl}
+{The Lisp reader/parser implementation}
+
+To create quoted constants it is necessary to introduce a new type of
+expression.  When an instance of class {\sf QuotedConst} is evaluated, it simply
+returns its (unevaluated) data value.
+
+\section{Value-ops}
+
+In addition to adding a number of new value-ops, the Lisp interpreter modifies
+the meaning of a few of the Chapter 1 functions.  For example the relational
+operators must now return the values {\sf T} or {\sf nil}, and not 1 and 0
+values.  Similarly the meaning of {\em true} and {\em false} used by the {\sf
+    if} and {\sf while} statements is changed.  Finally the equality testing
+function ($=$) must now recognize both symbols and integers.
+
+\subsection{Relationals}
+
+Figure~\ref{EqualFunction} shows the revised definition of the equality testing
+function, which now must be prepared to handle symbols and well as integers.
+%
+\includecode{lispPrimitives.C}{EqualFunction}
+{The revised Definition of the equality function}
+
+Implementation of the boolean binary functions is simplified by the introduction
+of a class {\sf BooleanBinaryFunction} (Figure~\ref{BooleanBinaryFunction}).
+This class decodes the two integer arguments and invokes a further method to
+determine the boolean result.  Based on this result either the value of the
+global symbol representing true or the symbol representing false is returned.
+%
+\includecode{function.h}{BooleanBinaryFunction}
+{Class returning boolean results from relationals}
+%
+\includecode{function.C}{BooleanBinaryFunctionApply}
+{{\sf BooleanBinaryFunction} apply function}
+
+Finally Figure~\ref{LispIsTrue} shows the revised function used by {\sf if} and
+{\sf while} statements to determine the truth or falsity of their condition.
+Unlike in Chapter 1, where 0 and 1 were used to represent true and false, here
+{\sf nil} is used as the only false value.
+%
+\includecode{lisp.C}{LispIsTrue}
+{Specialised {\sf isTrue} for lisp}
+
+\subsection{Car, Cdr and Cons}
+
+{\sf car} and {\sf cdr} are implemented as simple unary functions
+(Figure~\ref{CarCdrCons}), and {\sf cons} is a simple binary function that
+creates a new {\sf ListNode} out of its two arguments.
+%
+\includecode{lispPrimitives.C}{CarCdrCons}
+{{Implementation of {\sf car}, {\sf cdr} and {\sf cons}}}
+
+\footnote{A matter for debate is whether Cons should give an error if the second
+    argument is not a list.  Real Lisp doesn't care; but also uses a different
+    format for printing such lists.  Our interpreter prints such as lists
+    exactly as if the second argument had been a list containing the element.}
+
+\subsection{Predicates}
+
+The implementation of the predicates {\sf number?}, {\sf symbol?}, {\sf list?}
+and {\sf null?} is simplified by the creation of a class {\sf BooleanUnary}
+(Figure~\ref{BooleanUnary}), subclassing {\sf UnaryFunction}.  As with the
+integer functions implemented in chapter 1, instances of {\sf BooleanUnary}
+maintain as part of their state a function that takes an expression and returns
+an integer (that is, boolean) value.  Thus for each predicate it is only
+necessary to write a function which takes the single argument and returns a
+true/false indication.
+%
+\includecode{lisp.h}{BooleanUnary}
+{The class {\sf BooleanUnary}}
+%
+\includecode{lispPrimitives.C}{BooleanUnaryApply}
+{{\sf BooleanUnary} apply function}
+
+\section{Initialization of the Lisp Interpreter}
+
+Figure~\ref{LispInitialize} shows the initialization method for the Lisp
+interpreter.
+%
+\includecode{lisp.C}{LispInitialize}
+{Initialization of the Lisp interpreter}
