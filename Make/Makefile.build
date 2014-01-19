@@ -1,0 +1,46 @@
+###-----------------------------------------------------------------------------
+##  This file is part of
+### ---              Timothy Budd's Kamin Interpreters in C++
+###-----------------------------------------------------------------------------
+### Title: Common build rules
+###-----------------------------------------------------------------------------
+
+###-----------------------------------------------------------------------------
+### Message controls
+###-----------------------------------------------------------------------------
+H=@
+V=@if [ ! -z "$<" ]; then echo Compiling $<; fi;
+R=@if [ ! -z "$@" ]; then echo Building $@; fi;
+
+###-----------------------------------------------------------------------------
+### Compilation flags
+###-----------------------------------------------------------------------------
+DFLAGS_none = -O1
+DFLAGS_opt = -O3
+DFLAGS_debug = -g
+
+#CXX = g++
+CXX = clang++
+CXXFLAGS = -I. -I$(PROJECT_DIR) -Wall -Wextra -Wno-unused-parameter -Wold-style-cast
+
+$(OBJDIR):
+	$R mkdir -p $(OBJDIR)
+
+$(OBJDIR)/%.o: %.C | $(OBJDIR)
+	$V $(CXX) $(CXXFLAGS) $(CPPFLAGS_$*) $(CXXFLAGS_$*) -o $@ -c $<
+
+$(OBJDIR)/%: %.C $(OBJECTS) $(INCLUDES)
+	$V $(CXX) $(CXXFLAGS) -o $@ $(OBJECTS) $<
+
+$(OBJECTS): $(INCLUDES)
+
+###-----------------------------------------------------------------------------
+### Documentation build commands
+###-----------------------------------------------------------------------------
+.SUFFIXES: .org .html .pdf
+.org.html:
+	$R eemacs $< --batch --eval "(org-export-as-html t)"
+.org.pdf:
+	$R eemacs $< --batch --eval "(org-export-as-pdf 3)"
+
+###-----------------------------------------------------------------------------

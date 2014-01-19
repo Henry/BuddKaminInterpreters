@@ -1,0 +1,34 @@
+#                            -*- mode: org; -*-
+#
+#+TITLE:                         *TODO*
+#+AUTHOR: nil
+#+OPTIONS: author:nil email:nil ^:{}
+
+* Documentation =Doc=
+*** DONE Complete the replacement of =\begin{lstlisting}= for =\lstinputlisting=
+    CLOSED: [2014-01-19 Sun 17:35]
+    such that all code listings are imported directly from the source files in
+    =Src=.  See =chap.tex= for an example of what needs to be done.  Note that
+    using the annotation syntax =/// <lable name>= the Makefile generates the
+    list of first and last line numbers automatically.  See =Src/main.C= for an
+    example.
+*** TODO Rename files to correspond to the languages rather than the chapters
+    Alternatively combine the language name and the chapter number /e.g./ "chap2_lisp.tex"
+
+* Source code =Src=
+*** DONE Complete the conversion of member functions and arguments to =const=
+    CLOSED: [2014-01-19 Sun 17:36]
+    where appropriate.  Once this is done the =const_cast= statements can be
+    removed.
+*** TODO Introduce a =namespace=
+    /e.g./ =Kamin= or =Budd= or =BuddKamin=.
+*** TODO Update =Makefile= adding proper dependency checking.
+*** DONE Rename files to correspond to the languages rather than the chapters.
+    CLOSED: [2014-01-14 Tue 22:54]
+*** TODO Replace use of =char*= with C++ =std::string=
+*** TODO Replace C IO functions with C++ =std::iostream= operators.
+*** TODO Complete updating Kamin test codes for the Budd versions of the intepreters
+*** TODO Use valgrind to test for memory leaks
+
+* Release =GitHub=
+*** TODO When the code is updated release on GitHub

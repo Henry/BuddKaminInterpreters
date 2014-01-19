@@ -1,0 +1,31 @@
+# Ignore editor and misc backup files - anywhere
+*~
+.*~
+*.bak
+\#*\#
+.directory
+
+# Ignore platforms directories
+platforms
+
+# Ignore all object files
+*.o
+
+# Ignore library files
+*.so
+
+# Ignore generated doc files
+*.pdf
+*.tex
+
+# Ignore all run logs
+*.log
+*.out
+
+# Ignore corefiles
+core
+vgcore*
+
+updateDocs
+
+# end-of-file
