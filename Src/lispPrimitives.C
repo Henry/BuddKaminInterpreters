@@ -368,8 +368,12 @@ void SetStatement::apply(Expr& target, ListNode* args, Environment* rho)
 ///- SetStatementApply
 
 /// BeginStatementApply
-void BeginStatement::applyWithArgs(Expr& target, ListNode* args,
-Environment* rho)
+void BeginStatement::applyWithArgs
+(
+    Expr& target,
+    ListNode* args,
+    Environment* rho
+)
 {
     int len = args->length();
 

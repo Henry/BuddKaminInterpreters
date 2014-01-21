@@ -76,7 +76,6 @@ ListNode* ListNode::tail()
 /// ListEval
 void ListNode::eval(Expr& target, Environment* valueops, Environment* rho)
 {
-
     // an empty list evaluates to nil
     if (isNil())
     {
