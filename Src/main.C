@@ -51,6 +51,17 @@ int main()
         entered.evalAndPrint(commands, globalEnvironment);
     }
 
+    delete reader;
+
+    commands = 0;
+    delete commands;
+    valueOps = 0;
+    delete valueOps;
+    globalEnvironment = 0;
+    delete globalEnvironment;
+    emptyList = 0;
+    delete emptyList;
+
     return 0;
 }
 ///- main

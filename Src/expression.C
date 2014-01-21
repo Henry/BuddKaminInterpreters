@@ -193,7 +193,7 @@ Symbol::Symbol(const char* t)
 
 void Symbol::free()
 {
-    delete text;
+    delete[] text;
 }
 
 void Symbol::eval(Expr& target, Environment* valueops, Environment* rho)
