@@ -17,11 +17,11 @@ R=@if [ ! -z "$@" ]; then echo Building $@; fi;
 ###-----------------------------------------------------------------------------
 DFLAGS_none = -O1
 DFLAGS_opt = -O3
-DFLAGS_debug = -g
+DFLAGS_debug = -ggdb3
 
-#CXX = g++
-CXX = clang++
-CXXFLAGS = -I. -I$(PROJECT_DIR) -Wall -Wextra -Wno-unused-parameter -Wold-style-cast
+CXX = g++
+#CXX = clang++
+CXXFLAGS = -I. -I$(PROJECT_DIR) -Wall -Wextra -Wno-unused-parameter -Wold-style-cast $(DFLAGS_$(TARGET))
 
 $(OBJDIR):
 	$R mkdir -p $(OBJDIR)
