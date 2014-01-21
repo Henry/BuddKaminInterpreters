@@ -31,8 +31,8 @@ Environment* Environment::isEnvironment()
 /// EnvironmentAdd
 void Environment::add(Symbol* s, Expression* v)
 {
-    theNames = new ListNode(s, (ListNode*) theNames);
-    theValues = new ListNode(v, (ListNode*) theValues);
+    theNames = new ListNode(s, theNames.operator ListNode*());
+    theValues = new ListNode(v, theValues.operator ListNode*());
 }
 
 void Environment::set(Symbol* sym, Expression* value)
