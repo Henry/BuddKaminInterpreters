@@ -85,6 +85,9 @@ void UnaryFunction::applyWithArgs
     {
         fun(target, args->at(0));
     }
+
+    // Cleanup args as they are not owned by the environment
+    delete args;
 }
 
 //
@@ -117,6 +120,9 @@ void BinaryFunction::applyWithArgs
     {
         fun(target, args->at(0), args->at(1));
     }
+
+    // Cleanup args as they are not owned by the environment
+    delete args;
 }
 
 //
@@ -141,6 +147,9 @@ void IntegerBinaryFunction::applyWithArgs
 
     target = new IntegerExpression(fun(left->isInteger()->val(),
     right->isInteger()->val()));
+
+    // Cleanup args as they are not owned by the environment
+    delete args;
 }
 ///- IntegerBinaryFunctionApply
 
@@ -172,6 +181,9 @@ void BooleanBinaryFunction::applyWithArgs
     {
         target = falseExpr();
     }
+
+    // Cleanup args as they are not owned by the environment
+    delete args;
 }
 ///- BooleanBinaryFunctionApply
 

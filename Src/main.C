@@ -4,6 +4,7 @@
 
 #include "environment.h"
 #include "reader.h"
+#include <stdio.h>
 
 // Forward definitions
 extern void initialize();
@@ -52,15 +53,19 @@ int main()
         entered.evalAndPrint(commands, globalEnvironment);
     }
 
+    trueExpr = 0;
+    falseExpr = 0;
+
+    // Delete the dynamically-allocated reader
+    delete reader;
+
     // Unset all reference-counted object to cause destruction
     entered = 0;
     commands = 0;
     valueOps = 0;
-    globalEnvironment = 0;
+    globalEnvironment.operator Environment*()->free();
+    delete globalEnvironment.operator Environment*();
     emptyList = 0;
-
-    // Delete the dynamically-allocated reader
-    delete reader;
 
     return 0;
 }

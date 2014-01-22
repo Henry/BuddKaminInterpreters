@@ -277,8 +277,12 @@ public:
     virtual void applyOp(Expr&, APLValue*);
 };
 
-void APLUnaryFunction::applyWithArgs(Expr& target, ListNode* args,
-Environment* rho)
+void APLUnaryFunction::applyWithArgs
+(
+    Expr& target,
+    ListNode* args,
+    Environment* rho
+)
 {
     APLValue* arg1 = args->at(0)->isAPLValue();
     if (!arg1)
@@ -303,9 +307,19 @@ public:
     virtual void applyOp(Expr&, APLValue*, APLValue*);
 };
 
-void APLBinaryFunction::applyWithArgs(Expr& target, ListNode* args,
-Environment* rho)
+void APLBinaryFunction::applyWithArgs
+(
+    Expr& target,
+    ListNode* args,
+    Environment* rho
+)
 {
+    if (args->length() != 2)
+    {
+        target = error("binary function given other than 2 arguments");
+        return;
+    }
+
     APLValue* arg1 = args->at(0)->isAPLValue();
     APLValue* arg2 = args->at(1)->isAPLValue();
     if ((!arg1) || (!arg2))
@@ -313,6 +327,7 @@ Environment* rho)
         target = error("non-apl value given to binary function");
         return;
     }
+
     applyOp(target, arg1, arg2);
 }
 
@@ -675,8 +690,12 @@ public:
 };
 
 /// APLCatenationFunctionApply
-void CatenationFunction::applyOp(Expr& target, APLValue* left,
-APLValue* right)
+void CatenationFunction::applyOp
+(
+    Expr& target,
+    APLValue* left,
+    APLValue* right
+)
 {
     ListNode* lshape = left->shape();
     ListNode* rshape = right->shape();
@@ -802,8 +821,12 @@ public:
 };
 
 /// APLSubscriptFunction
-void SubscriptFunction::applyOp(Expr& target, APLValue* left,
-APLValue* right)
+void SubscriptFunction::applyOp
+(
+    Expr& target,
+    APLValue* left,
+    APLValue* right
+)
 {
     if (right->shape()->length() >= 2)
     {

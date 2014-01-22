@@ -19,6 +19,11 @@ public:
 
     ListNode(Expression*, Expression*);
 
+    virtual ~ListNode()
+    {
+        free();
+    }
+
     // overridden methods
     virtual void free();
     virtual void eval(Expr&, Environment*, Environment*);
@@ -51,7 +56,12 @@ public:
 
     operator ListNode*()
     {
-        return val()? val()->isList() : 0;
+        return val() ? val()->isList() : 0;
+    }
+
+    ListNode* operator()()
+    {
+        return val() ? val()->isList() : 0;
     }
 
     void operator=(ListNode* r)

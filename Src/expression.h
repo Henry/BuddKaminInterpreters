@@ -48,7 +48,8 @@ class Continuation;
 /// Expression
 class Expression
 {
-private:
+    public:
+//private:
     friend class Expr;
     mutable int referenceCount;
 

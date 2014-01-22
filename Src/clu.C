@@ -17,8 +17,11 @@ extern Expr falseExpr;
 int isTrue(Expression* cond)
 {
     IntegerExpression* ival = cond->isInteger();
+
     if (ival && ival->val() == 0)
+    {
         return 0;
+    }
     return 1;
 }
 
@@ -32,22 +35,25 @@ class Cluster
 :
     public Expression
 {
-private:
     Env data;
 
 public:
+
     Cluster(ListNode* names, ListNode* values)
     {
         data = new Environment(names, values, 0);
     }
+
     virtual void free()
     {
         data = 0;
     }
+
     virtual void print()
     {
         printf("<userval>");
     }
+
     virtual Environment* isCluster()
     {
         return data;
@@ -58,18 +64,20 @@ class Constructor
 :
     public Function
 {
-private:
     List names;
 
 public:
+
     Constructor(ListNode* n)
     {
         names = n;
     }
+
     virtual void free()
     {
         names = 0;
     }
+
     virtual void applyWithArgs(Expr&, ListNode*, Environment*);
 };
 
@@ -81,11 +89,13 @@ void Constructor::applyWithArgs
 )
 {
     ListNode* nmes = names;
+
     if (args->length() != nmes->length())
     {
         target = error("wrong number of args passed to constructor");
         return;
     }
+
     target = new Cluster(nmes, args);
 }
 ///- CLUCluster
@@ -95,18 +105,20 @@ class Selector
 :
      public UnaryFunction
 {
-private:
     Expr fieldName;
 
 public:
+
     Selector(Symbol* name)
     {
         fieldName = name;
     }
+
     virtual void free()
     {
         fieldName = 0;
     }
+
     virtual void applyWithArgs(Expr&, ListNode*, Environment*);
 };
 
@@ -128,6 +140,8 @@ void Selector::applyWithArgs(Expr& target, ListNode* args, Environment* rho)
     {
         error("selector cannot find symbol:", s->chars());
     }
+
+    delete args;
 }
 
 class Modifier
@@ -161,6 +175,8 @@ void Modifier::applyWithArgs(Expr& target, ListNode* args, Environment* rho)
     // set the result to the value
     target = args->at(1);
     x->set(fieldName()->isSymbol(), target());
+
+    delete args;
 }
 ///- CLUSelectorModifier
 

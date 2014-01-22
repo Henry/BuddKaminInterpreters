@@ -181,6 +181,9 @@ void BooleanUnary::applyWithArgs(Expr& target, ListNode* args, Environment*)
     {
         target = falseExpr();
     }
+
+    // Cleanup args as they are not owned by the environment
+    delete args;
 }
 
 int NumberpFunction(Expression* arg)
@@ -386,5 +389,8 @@ void BeginStatement::applyWithArgs
     {
         target = args->at(len - 1);
     }
+
+    // Cleanup args as they are not owned by the environment
+    delete args;
 }
 ///- BeginStatementApply
