@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <iostream>
 
 #include "lisp.h"
 
@@ -27,16 +27,16 @@ void QuotedConst::eval(Expr& target, Environment*, Environment*)
 
 void QuotedConst::print()
 {
-    printf("'");
+    std::cout<< '\'';
     value_()->print();
 }
 
 Expression* LispReader::readExpression()
 {
     // if quoted constant, return it,
-    if ((*p == '\'') || (*p == '`'))
+    if ((*p_ == '\'') || (*p_ == '`'))
     {
-        p++;
+        p_++;
         return new QuotedConst(readExpression());
     }
 
@@ -249,7 +249,7 @@ void PrintFunction(Expr& target, Expression* arg)
     {
         target()->print();
     }
-    printf("\n");
+    std::cout<< '\n';
 }
 
 //

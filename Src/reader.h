@@ -11,6 +11,8 @@
 #ifndef Reader_H
 #define Reader_H
 
+#include <string>
+
 // -----------------------------------------------------------------------------
 /// Forward declarations
 // -----------------------------------------------------------------------------
@@ -26,23 +28,17 @@ class ReaderClass
 {
 protected:
 
-    //- Input buffer size
-    static const int bufferSize = 1000;
-
     //- The input buffer
-    char buffer[bufferSize];
+    std::string buffer_;
 
     //- Current location in buffer
-    char* p;
+    const char* p_;
 
     //- Print prompt
     void printPrimaryPrompt() const;
 
     //- Print secondary prompt
     void printSecondaryPrompt() const;
-
-    //- Remove \n
-    char* removeNewline(char* s) const;
 
     //- Read input into buffer
     void fillInputBuffer();

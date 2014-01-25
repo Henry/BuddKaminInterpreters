@@ -4,7 +4,7 @@
 
 #include "environment.h"
 #include "reader.h"
-#include <stdio.h>
+#include <iostream>
 
 // Forward definitions
 extern ReaderClass* initialize();
@@ -43,7 +43,7 @@ int main()
         Symbol* sym = entered()->isSymbol();
         if (sym && (*sym == "quit"))
         {
-            printf("\n");
+            std::cout<< '\n';
             break;
         }
 

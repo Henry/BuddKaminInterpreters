@@ -1,5 +1,4 @@
-#include <string.h>
-#include <stdio.h>
+#include <iostream>
 
 #include "lisp.h"
 
@@ -72,11 +71,11 @@ void PrologValue::print()
     Symbol* s = isSymbol();
     if (s)
     {
-        printf("%s", s->name());
+        std::cout<< s->name();
     }
     else
     {
-        printf("unbound variable");
+        std::cout<< "unbound variable";
     }
 }
 
@@ -109,7 +108,7 @@ void PrologValue::eval(Expr& target, Environment* valueOps, Environment* rho)
     Symbol* s = isSymbol();
     if (s)
     {
-        const char* p = s->name();
+        const char* p = s->name().c_str();
         Expression* r = rho->lookup(s);
         if (r)
         {
@@ -149,9 +148,9 @@ protected:
 Expression* PrologReader::readExpression()
 {
     // it might be a list
-    if (*p == '(')
+    if (*p_ == '(')
     {
-        p++;
+        p_++;
         return readList();
     }
 
@@ -171,7 +170,7 @@ public:
     virtual int withContinuation(Continuation*);
     virtual void print()
     {
-        printf("<future>");
+        std::cout<< "<future>";
     }
     virtual Continuation* isContinuation()
     {
@@ -349,7 +348,7 @@ static int unify(PrologValue* &c, PrologValue* a, PrologValue* b)
     {
         error("impossible", "unification of non-symbols");
     }
-    else if (strcmp(as->name(), bs->name()) == 0)
+    else if (as->name() == bs->name())
     {
         return 1;
     }
@@ -443,7 +442,7 @@ int PrintContinuation::withContinuation(Continuation* future)
     Symbol* s = val()->isSymbol();
     if (s)
     {
-        printf("%s\n", s->name());
+        std::cout<< s->name() << '\n';
         return future->withContinuation(nothing);
     }
     return 0;

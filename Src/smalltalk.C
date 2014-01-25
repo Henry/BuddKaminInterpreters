@@ -1,5 +1,4 @@
-#include <ctype.h>
-#include <stdio.h>
+#include <iostream>
 
 #include "lisp.h"
 #include "environment.h"
@@ -47,7 +46,7 @@ public:
 
     virtual void print()
     {
-        printf("<object>");
+        std::cout<< "<object>";
     }
 
     virtual void apply(Expr&, ListNode*, Environment*);
@@ -348,29 +347,30 @@ protected:
 Expression* SmalltalkReader::readExpression()
 {
     // see if it's an integer
-    if (isdigit(*p))
+    if (isdigit(*p_))
     {
         return new IntegerObject(readInteger());
     }
 
     // might be a signed integer
-    if ((*p == '-') && isdigit(*(p + 1)))
+    if ((*p_ == '-') && isdigit(*(p_ + 1)))
     {
-        p++;
+        p_++;
         return new IntegerObject(-readInteger());
     }
 
     // or it might be a symbol
-    if (*p == '#')
+    if (*p_ == '#')
     {
-        char token[80],* q;
+        char token[80], *q;
 
-        for (q = token; !isSeparator(*p);)
+        for (q = token; !isSeparator(*p_);)
         {
-           * q++ =* p++;
+           *q++ = *p_++;
         }
-       * q = '\0';
-        return new SmalltalkSymbol(token);
+        *q = '\0';
+
+        return new SmalltalkSymbol(Symbol(token));
     }
 
     // anything else, do as before

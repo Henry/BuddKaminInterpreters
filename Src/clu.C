@@ -1,5 +1,4 @@
-#include <string.h>
-#include <stdio.h>
+#include <iostream>
 
 #include "lisp.h"
 #include "environment.h"
@@ -50,7 +49,7 @@ public:
 
     virtual void print()
     {
-        printf("<userval>");
+        std::cout<< "<userval>";
     }
 
     virtual Environment* isCluster()
@@ -195,15 +194,7 @@ static void catset
     Expression* val
 )
 {
-    char buffer[120];
-
-    // catenate the two symbols
-    strcpy(buffer, left->name());
-    strcat(buffer, mid);
-    strcat(buffer, right->name());
-
-    // now put the new value into rho
-    rho->add(new Symbol(buffer), val);
+    rho->add(new Symbol(left->name() + mid + right->name()), val);
 }
 
 void ClusterDef::apply(Expr& target, ListNode* args, Environment* rho)

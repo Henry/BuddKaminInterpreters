@@ -25,11 +25,15 @@
 *** TODO Update =Makefile= adding proper dependency checking.
 *** DONE Rename files to correspond to the languages rather than the chapters.
     CLOSED: [2014-01-14 Tue 22:54]
-*** TODO Replace use of =char*= with C++ =std::string=
-*** TODO Replace C IO functions with C++ =std::iostream= operators.
+*** DONE Replace use of =char*= with C++ =std::string=
+    CLOSED: [2014-01-25 Sat 21:18]
+*** DONE Replace C IO functions with C++ =std::iostream= operators.
+    CLOSED: [2014-01-25 Sat 21:18]
 *** TODO Complete updating Kamin test codes for the Budd versions of the intepreters
-*** TODO Use valgrind to test for memory leaks
-*** TODO Improve handling for =args= to resolve memory leaks
+*** DONE Use valgrind to test for memory leaks
+    CLOSED: [2014-01-25 Sat 21:18]
+*** DONE Improve handling for =args= to resolve memory leaks
+    CLOSED: [2014-01-25 Sat 21:19]
     To temporarily fix memory leaks in the interpreters originating from the
     =ListNode* args= being created on free-store but not always transferred to a
     reference-counted =List= structure in the environment they are now
@@ -43,4 +47,5 @@
     classes.
 
 * Release =GitHub=
-*** TODO When the code is updated release on GitHub
+*** DONE When the code is updated release on GitHub
+    CLOSED: [2014-01-25 Sat 21:19]

@@ -3,10 +3,8 @@
 //
 
 #include "lisp.h"
-//      uses printf from stdio package
-#include <stdio.h>
-//      uses isdigit from ctypes
-#include <ctype.h>
+#include <iostream>
+#include <cctype>
 
 extern Env globalEnvironment;
 extern Env commands;
@@ -107,7 +105,7 @@ void APLValue::print()
     switch (shape()->length())
     {
         case 0:        // scalar values
-            printf("%d", at(0));
+            std::cout<< at(0);
             break;
 
         case 1:        // vector values
@@ -115,7 +113,7 @@ void APLValue::print()
             int len = size();
             for (int i = 0; i < len; i++)
             {
-                printf("%d ", at(i));
+                std::cout<< at(i);
             }
             break;
         }
@@ -128,15 +126,15 @@ void APLValue::print()
             {
                 for (int j = 0; j < len2; j++)
                 {
-                    printf("%d ", at(i*len2 + j));
+                    std::cout<< at(i*len2 + j) << ' ';
                 }
-                printf("\n");
+                std::cout<< '\n';
             }
             break;
         }
 
         default:
-            printf("rank is %d\n", shape()->length());
+            std::cout<< "rank is " << shape()->length() << '\n';
             error("unknown rank in apl value printing");
     }
 }
@@ -186,23 +184,23 @@ private:
 Expression* APLreader::readExpression()
 {
     // see if it is a scalar value
-    if ((*p == '-') && isdigit(*(p + 1)))
+    if ((*p_ == '-') && isdigit(*(p_ + 1)))
     {
-        p++;
+        p_++;
         return readAPLscalar(-readInteger());
     }
 
-    if (isdigit(*p))
+    if (isdigit(*p_))
     {
         return readAPLscalar(readInteger());
     }
 
     // see if it is a vector constant
-    if (*p == '(')
+    if (*p_ == '(')
     {
-        p++;
+        p_++;
         skipNewlines();
-        if (isdigit(*p))
+        if (isdigit(*p_))
         {
             return readAPLvector(0);
         }
@@ -228,21 +226,21 @@ APLValue* APLreader::readAPLvector(int size)
     skipNewlines();
 
     // if at end of list, make new vector
-    if (*p == ')')
+    if (*p_ == ')')
     {
-        p++;
+        p_++;
         return new APLValue(size);
     }
 
     // else we better have a digit, save it and get the rest
     int sign = 1;
-    if (*p == '-')
+    if (*p_ == '-')
     {
         sign = -1;
-        p++;
+        p_++;
     }
 
-    if (!isdigit(*p))
+    if (!isdigit(*p_))
     {
         error("ill formed apl vector constant");
     }

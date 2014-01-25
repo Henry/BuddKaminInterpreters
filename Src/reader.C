@@ -1,6 +1,5 @@
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
+#include <cctype>
+#include <iostream>
 
 #include "expression.h"
 #include "list.h"
@@ -8,46 +7,28 @@
 
 extern List emptyList;
 
-Expression* error(const char* a, const char* b)
-{
-    fprintf(stderr, "Error: %s%s\n", a, b);
-    return 0;
-}
-
 void ReaderClass::printPrimaryPrompt() const
 {
-    printf("\n-> ");
-    fflush(stdout);
+    std::cout<< "\n-> " << std::flush;
 }
 
 void ReaderClass::printSecondaryPrompt() const
 {
-    printf("> ");
-    fflush(stdout);
-}
-
-char* ReaderClass::removeNewline(char* s) const
-{
-    int len = strlen(s);
-
-    if (len > 0 && s[len-1] == '\n')  // if there's a newline
-    {
-        s[len-1] = '\0';          // truncate the string
-    }
-
-    return s;
+    std::cout<< "> " << std::flush;
 }
 
 void ReaderClass::fillInputBuffer()
 {
-    // if the user indicates end of file make it a quit
-    if (fgets(buffer, bufferSize, stdin) == NULL)
+    std::getline(std::cin, buffer_);
+
+    if (std::cin.eof())
     {
-        strcpy(buffer, "quit");
+        buffer_ += "quit";
     }
 
-    // initialize the current pointer
-    p = removeNewline(buffer);
+    // Initialize the current pointer
+    p_ = buffer_.c_str();
+
     skipSpaces();
 }
 
@@ -58,13 +39,11 @@ int ReaderClass::isSeparator(int c) const
         case ' ':
         case '\t':
         case '\n':
-        case EOF:
         case '\0':
         case '\'':
         case ';':
         case ')':
         case '(':
-
             return 1;
     }
     return 0;
@@ -72,18 +51,26 @@ int ReaderClass::isSeparator(int c) const
 
 void ReaderClass::skipSpaces()
 {
-    while ((*p == ' ') || (*p == '\t'))
-        p++;
-    if (*p == ';')      // comment
-        while (*p)
-            p++;        // read until end of line
+    while ((*p_ == ' ') || (*p_ == '\t'))
+    {
+        p_++;
+    }
+
+    if (*p_ == ';')      // comment
+    {
+        while (*p_)
+        {
+            p_++;        // read until end of line
+        }
+    }
 }
 
 void ReaderClass::skipNewlines()
 {
     skipSpaces();
-    while (*p == '\0')
-    {   // end of line
+    while (*p_ == '\0')
+    {
+        // end of line
         printSecondaryPrompt();
         fillInputBuffer();
     }
@@ -97,16 +84,16 @@ Expression* ReaderClass::promptAndRead()
     {
         printPrimaryPrompt();
         fillInputBuffer();
-    } while (!*p);
+    } while (!*p_);
 
     // now that we have something, break it apart
     Expression* val = readExpression();
 
     // make sure we are at and of line
     skipSpaces();
-    if (*p)
+    if (*p_)
     {
-        error("unexpected characters at end of line:", p);
+        error("unexpected characters at end of line:", p_);
     }
     return val;
 }
@@ -116,20 +103,22 @@ Expression* ReaderClass::promptAndRead()
 Expression* ReaderClass::readExpression()
 {
     // see if it's an integer
-    if (isdigit(*p))
+    if (isdigit(*p_))
+    {
         return new IntegerExpression(readInteger());
+    }
 
     // might be a signed integer
-    if ((*p == '-') && isdigit(*(p + 1)))
+    if ((*p_ == '-') && isdigit(*(p_ + 1)))
     {
-        p++;
+        p_++;
         return new IntegerExpression(-readInteger());
     }
 
     // or it might be a list
-    if (*p == '(')
+    if (*p_ == '(')
     {
-        p++;
+        p_++;
         return readList();
     }
 
@@ -144,9 +133,9 @@ ListNode* ReaderClass::readList()
     skipNewlines();
 
     // if end of list, return empty list
-    if (*p == ')')
+    if (*p_ == ')')
     {
-        p++;
+        p_++;
         return emptyList;
     }
 
@@ -159,10 +148,10 @@ ListNode* ReaderClass::readList()
 int ReaderClass::readInteger()
 {
     int val = 0;
-    while (isdigit(*p))
+    while (isdigit(*p_))
     {
-        val = val* 10 + (*p - '0');
-        p++;
+        val = val* 10 + (*p_ - '0');
+        p_++;
     }
     return val;
 }
@@ -171,8 +160,10 @@ Symbol* ReaderClass::readSymbol()
 {
     char token[80],* q;
 
-    for (q = token; !isSeparator(*p);)
-       * q++ =* p++;
-   * q = '\0';
+    for (q = token; !isSeparator(*p_);)
+    {
+       *q++ = *p_++;
+    }
+    *q = '\0';
     return new Symbol(token);
 }

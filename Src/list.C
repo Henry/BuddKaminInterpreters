@@ -1,5 +1,5 @@
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <iostream>
 
 #include "list.h"
 #include "function.h"
@@ -61,7 +61,7 @@ ListNode* ListNode::tail()
     if (!tail_())
     {
         error("impossible case", "tail on empty list??");
-        exit(1);
+        std::exit(1);
     }
 
     ListNode* x = tail_()->isList();
@@ -121,7 +121,7 @@ void ListNode::eval(Expr& target, Environment* valueops, Environment* rho)
 
 void ListNode::print()
 {
-    printf("(");
+    std::cout<< '(';
     if (!isNil())
     {
         // not a nil list, print elements
@@ -132,7 +132,7 @@ void ListNode::print()
             ListNode* cdl = cd->isList();
             if (!cdl)
             {
-                printf(" ");
+                std::cout<< ' ';
                 cd->print();
                 break;
             }
@@ -140,12 +140,12 @@ void ListNode::print()
             {
                 break;
             }
-            printf(" ");
+            std::cout<< ' ';
             cdl->head()->print();
             cd = cdl->tail();
         }
     }
-    printf(")");
+    std::cout<< ')';
 }
 
 ListNode* ListNode::isList()

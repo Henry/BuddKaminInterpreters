@@ -11,6 +11,8 @@
 #ifndef Expression_H
 #define Expression_H
 
+#include <string>
+
 // -----------------------------------------------------------------------------
 /// Forward declarations
 // -----------------------------------------------------------------------------
@@ -153,12 +155,12 @@ class Symbol
     public Expression
 {
     //- The symbol name
-    char* name_;
+    std::string name_;
 
 public:
 
     //- Construct given the name
-    Symbol(const char* name);
+    Symbol(const std::string& name);
 
     //- Destructor which deletes the name
     virtual ~Symbol();
@@ -176,15 +178,21 @@ public:
     int operator==(Expression*) const;
 
     //- Compare with the given name
+    int operator==(const std::string&) const;
+
+    //- Compare with the given name
     int operator==(const char*) const;
 
     //- Return the symbol's name
-    const char* name() const
+    const std::string name() const
     {
         return name_;
     }
 };
 ///- Symbol
+
+//- Generate an error expression
+Expression* error(const char*, const std::string&);
 
 //- Generate an error expression
 Expression* error(const char*, const char* x = 0);

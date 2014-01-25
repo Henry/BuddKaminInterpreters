@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include <iostream>
+
 #include "lisp.h"
 #include "environment.h"
 
@@ -70,7 +71,7 @@ void Thunk::print()
     }
     else
     {
-        printf("...");
+        std::cout<< "...";
     }
 }
 ///- SASLThunk

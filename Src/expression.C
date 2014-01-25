@@ -1,7 +1,5 @@
 #include "expression.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <iostream>
 
 
 //
@@ -86,7 +84,7 @@ void Expr::print()
     {
         value_->print();
     }
-    printf("\n");
+    std::cout<< '\n';
 }
 #endif
 
@@ -112,7 +110,7 @@ void Expression::eval(Expr& target, Environment* valueops, Environment* rho)
 
 void Expression::print()
 {
-    fprintf(stderr, "in expression::print - should be subclassed\n");
+    std::cerr<< "in expression::print - should be subclassed\n";
 }
 
 // conversions
@@ -184,7 +182,7 @@ Continuation* Expression::isContinuation()
 
 void IntegerExpression::print()
 {
-    printf("%d", value_);
+    std::cout<< value_;
 }
 
 IntegerExpression* IntegerExpression::isInteger()
@@ -196,22 +194,13 @@ IntegerExpression* IntegerExpression::isInteger()
 //      symbols
 //
 
-Symbol::Symbol(const char* t)
-{
-    // make a new copy of text
-    name_ = new char[strlen(t) + 1];
-    if (!name_)
-    {
-        error("allocation failure for symbol ", t);
-        exit(1);
-    }
-    strcpy(name_, t);
-}
+Symbol::Symbol(const std::string& s)
+:
+    name_(s)
+{}
 
 Symbol::~Symbol()
-{
-    delete[] name_;
-}
+{}
 
 void Symbol::eval(Expr& target, Environment* valueops, Environment* rho)
 {
@@ -222,14 +211,14 @@ void Symbol::eval(Expr& target, Environment* valueops, Environment* rho)
     }
     else
     {
-        result = error("evaluation of unknown symbol: ", name_);
+        result = error("evaluation of unknown symbol: ", name_.c_str());
     }
     target = result;
 }
 
 void Symbol::print()
 {
-    printf("%s", name_);
+    std::cout<< name_.c_str();
 }
 
 Symbol* Symbol::isSymbol()
@@ -248,13 +237,30 @@ int Symbol::operator==(Expression* sym) const
 
     if (s)
     {
-        return 0 == strcmp(name_, s->name_);
+        return name_ == s->name_;
     }
 
     return 0;
 }
 
+int Symbol::operator==(const std::string& t) const
+{
+    return name_ == t;
+}
+
 int Symbol::operator==(const char* t) const
 {
-    return 0 == strcmp(name_, t);
+    return name_ == t;
+}
+
+Expression* error(const char* a, const std::string& b)
+{
+    std::cerr<< "Error: " << a << b << '\n';
+    return 0;
+}
+
+Expression* error(const char* a, const char* b)
+{
+    std::cerr<< "Error: " << a << b << '\n';
+    return 0;
 }

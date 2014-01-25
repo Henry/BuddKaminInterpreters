@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <iostream>
 
 #include "environment.h"
 #include "function.h"
@@ -16,7 +16,7 @@ Function* Function::isFunction()
 
 void Function::print()
 {
-    printf("<closure>");
+    std::cout<< "<closure>";
 }
 
 int Function::isClosure()
