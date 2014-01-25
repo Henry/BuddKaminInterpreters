@@ -158,12 +158,14 @@ int ReaderClass::readInteger()
 
 Symbol* ReaderClass::readSymbol()
 {
-    char token[80],* q;
+    const char* symbolStart = p_;
+    int nSymbolChars = 0;
 
-    for (q = token; !isSeparator(*p_);)
+    while (!isSeparator(*p_))
     {
-       *q++ = *p_++;
+        nSymbolChars++;
+        p_++;
     }
-    *q = '\0';
-    return new Symbol(token);
+
+    return new Symbol(std::string(symbolStart, nSymbolChars));
 }

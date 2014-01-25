@@ -33,10 +33,10 @@ class Object
 public:
 
     Object(Environment* m, Environment* d)
-    {
-        methods = m;
-        data = d;
-    }
+    :
+        methods(m),
+        data(d)
+    {}
 
     virtual ~Object()
     {
@@ -69,9 +69,11 @@ protected:
     {}
 
 public:
-    Method(ListNode* anames, Expression* bod):
+    Method(ListNode* anames, Expression* bod)
+    :
         UserFunction(anames, bod, 0)
     {}
+
     virtual void doMethod
     (
         Expr&,
@@ -80,6 +82,7 @@ public:
         Environment*,
         Environment*
     );
+
     virtual Method* isMethod()
     {
         return this;
@@ -90,7 +93,6 @@ public:
 /// SmalltalkObjectApply
 void Object::apply(Expr& target, ListNode* args, Environment* rho)
 {
-
     // need at least a message
     if (args->length() < 1)
     {
@@ -346,34 +348,38 @@ protected:
 /// SmalltalkReader
 Expression* SmalltalkReader::readExpression()
 {
-    // see if it's an integer
+    // See if it's an integer
     if (isdigit(*p_))
     {
         return new IntegerObject(readInteger());
     }
 
-    // might be a signed integer
+    // Might be a signed integer
     if ((*p_ == '-') && isdigit(*(p_ + 1)))
     {
         p_++;
         return new IntegerObject(-readInteger());
     }
 
-    // or it might be a symbol
+    // Or it might be a symbol
     if (*p_ == '#')
     {
-        char token[80], *q;
+        const char* symbolStart = p_;
+        int nSymbolChars = 0;
 
-        for (q = token; !isSeparator(*p_);)
+        while (!isSeparator(*p_))
         {
-           *q++ = *p_++;
+            nSymbolChars++;
+            p_++;
         }
-        *q = '\0';
 
-        return new SmalltalkSymbol(Symbol(token));
+        return new SmalltalkSymbol
+        (
+            Symbol(std::string(symbolStart, nSymbolChars))
+        );
     }
 
-    // anything else, do as before
+    // Anything else, do as before
     return ReaderClass::readExpression();
 }
 ///- SmalltalkReader

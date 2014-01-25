@@ -211,14 +211,14 @@ void Symbol::eval(Expr& target, Environment* valueops, Environment* rho)
     }
     else
     {
-        result = error("evaluation of unknown symbol: ", name_.c_str());
+        result = error("evaluation of unknown symbol: ", name_);
     }
     target = result;
 }
 
 void Symbol::print()
 {
-    std::cout<< name_.c_str();
+    std::cout<< name_;
 }
 
 Symbol* Symbol::isSymbol()

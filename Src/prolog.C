@@ -108,26 +108,31 @@ void PrologValue::eval(Expr& target, Environment* valueOps, Environment* rho)
     Symbol* s = isSymbol();
     if (s)
     {
-        const char* p = s->name().c_str();
         Expression* r = rho->lookup(s);
         if (r)
         {
             target = r;
             return;
         }
-        // symbol is not known
-        // if lower case, eval to itself
+
+        // Symbol is not known
+        const char* p = s->name().c_str();
+
+        // If lower case, eval to itself
         if ((*p >= 'a') && (*p <= 'z'))
         {
-            // symbols eval to themselves
+            // Symbols eval to themselves
             target = this;
             return;
         }
-        // else make a new symbol
+
+        // Else make a new symbol
         target = new PrologValue(0);
         rho->add(s, target());
+
         return;
     }
+
     target = this;
     return;
 }
