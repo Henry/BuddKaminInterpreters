@@ -34,18 +34,17 @@ static ListNode* evalArgs(ListNode* args, Environment* rho)
         return args;
     }
 
-    Expr newhead;
     Expression* first = args->head();
+    Expr newhead;
     first->eval(newhead, valueOps, rho);
-    ListNode* newargs = new ListNode(newhead(), evalArgs(args->tail(), rho));
-    newhead = 0;            // Force garbage collection
 
-    return newargs;
+    return new ListNode(newhead(), evalArgs(args->tail(), rho));
 }
 
 void Function::apply(Expr& target, ListNode* args, Environment* rho)
 {
-    ListNode* newargs = evalArgs(args, rho);
+    // Hold the newargs as a List to ensure garbage collection
+    List newargs(evalArgs(args, rho));
     applyWithArgs(target, newargs, rho);
 }
 ///- FunctionApply
@@ -85,9 +84,6 @@ void UnaryFunction::applyWithArgs
     {
         fun(target, args->at(0));
     }
-
-    // Cleanup args as they are not owned by the environment
-    delete args;
 }
 
 //
@@ -120,9 +116,6 @@ void BinaryFunction::applyWithArgs
     {
         fun(target, args->at(0), args->at(1));
     }
-
-    // Cleanup args as they are not owned by the environment
-    delete args;
 }
 
 //
@@ -147,9 +140,6 @@ void IntegerBinaryFunction::applyWithArgs
 
     target = new IntegerExpression(fun(left->isInteger()->val(),
     right->isInteger()->val()));
-
-    // Cleanup args as they are not owned by the environment
-    delete args;
 }
 ///- IntegerBinaryFunctionApply
 
@@ -181,9 +171,6 @@ void BooleanBinaryFunction::applyWithArgs
     {
         target = falseExpr();
     }
-
-    // Cleanup args as they are not owned by the environment
-    delete args;
 }
 ///- BooleanBinaryFunctionApply
 
@@ -192,17 +179,25 @@ void BooleanBinaryFunction::applyWithArgs
 //
 
 UserFunction::UserFunction(ListNode* anames, Expression* bod, Environment* ctx)
-{
-    argNames = anames;
-    body = bod;
-    context = ctx;
-}
+:
+    argNames(anames),
+    body(bod),
+    context(ctx)
+{}
 
-void UserFunction::free()
+UserFunction::UserFunction(ListNode* anames, Expression* bod, Env& ctx)
+:
+    argNames(anames),
+    body(bod),
+    context(ctx),
+    local_(ctx)
+{}
+
+UserFunction::~UserFunction()
 {
     argNames = 0;
     body = 0;
-    context = 0;
+    local_ = 0;
 }
 
 int UserFunction::isClosure()
@@ -227,8 +222,7 @@ void UserFunction::applyWithArgs
     }
 
     // make new environment
-    Env newrho;
-    newrho = new Environment(an, args, context);
+    Env newrho(new Environment(an, args, context));
 
     // evaluate body in new environment
     Expression* bod = body();
@@ -240,7 +234,5 @@ void UserFunction::applyWithArgs
     {
         target = 0;
     }
-
-    newrho = 0;             // Force garbage collection
 }
 ///- UserFunctionApply

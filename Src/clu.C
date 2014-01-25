@@ -4,7 +4,6 @@
 #include "lisp.h"
 #include "environment.h"
 
-extern ReaderClass* reader;
 extern Env globalEnvironment;
 extern Env commands;
 extern Env valueOps;
@@ -44,7 +43,7 @@ public:
         data = new Environment(names, values, 0);
     }
 
-    virtual void free()
+    virtual ~Cluster()
     {
         data = 0;
     }
@@ -73,7 +72,7 @@ public:
         names = n;
     }
 
-    virtual void free()
+    virtual ~Constructor()
     {
         names = 0;
     }
@@ -114,7 +113,7 @@ public:
         fieldName = name;
     }
 
-    virtual void free()
+    virtual ~Selector()
     {
         fieldName = 0;
     }
@@ -140,26 +139,26 @@ void Selector::applyWithArgs(Expr& target, ListNode* args, Environment* rho)
     {
         error("selector cannot find symbol:", s->chars());
     }
-
-    delete args;
 }
 
 class Modifier
 :
     public BinaryFunction
 {
-private:
     Expr fieldName;
 
 public:
+
     Modifier(Symbol* name)
     {
         fieldName = name;
     }
-    virtual void free()
+
+    virtual ~Modifier()
     {
         fieldName = 0;
     }
+
     virtual void applyWithArgs(Expr&, ListNode*, Environment*);
 };
 
@@ -175,8 +174,6 @@ void Modifier::applyWithArgs(Expr& target, ListNode* args, Environment* rho)
     // set the result to the value
     target = args->at(1);
     x->set(fieldName()->isSymbol(), target());
-
-    delete args;
 }
 ///- CLUSelectorModifier
 
@@ -192,9 +189,9 @@ public:
 static void catset
 (
     Environment* rho,
-    Symbol* left,
+    const Symbol* left,
     const char* mid,
-    Symbol* right,
+    const Symbol* right,
     Expression* val
 )
 {
@@ -211,7 +208,7 @@ static void catset
 
 void ClusterDef::apply(Expr& target, ListNode* args, Environment* rho)
 {
-    Expr setprefix = new Symbol("set-");
+    Expr setprefix(new Symbol("set-"));
 
     // must have at least name, rep and one def
     if (args->length() < 3)
@@ -231,6 +228,7 @@ void ClusterDef::apply(Expr& target, ListNode* args, Environment* rho)
 
     // now make the environment in which cluster will execute
     Environment* inEnv = new Environment(emptyList, emptyList, rho);
+    catset(rho, name, "Env", name, inEnv);
 
     // next part should be representation
     ListNode* rep = args->head()->isList();
@@ -301,22 +299,19 @@ void ClusterDef::apply(Expr& target, ListNode* args, Environment* rho)
             inEnv->lookup(s)
         );
 
-        temp = 0;
-
-        // get next function
+        // Get next function
         args = args->tail();
     }
 
-    // what do we return?
+    // What do we return?
     target = 0;
-    setprefix = 0;
 }
 ///- CLUClusterDef
 
-void initialize()
+ReaderClass* initialize()
 {
     // initialize global variables
-    reader = new ReaderClass;
+    ReaderClass* reader = new ReaderClass;
     trueExpr = new IntegerExpression(1);
     falseExpr = new IntegerExpression(0);
 
@@ -339,4 +334,6 @@ void initialize()
     vo->add(new Symbol("<"), new IntegerBinaryFunction(LessThanFunction));
     vo->add(new Symbol(">"), new IntegerBinaryFunction(GreaterThanFunction));
     vo->add(new Symbol("print"), new UnaryFunction(PrintFunction));
+
+    return reader;
 }

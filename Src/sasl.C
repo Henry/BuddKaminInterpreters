@@ -2,7 +2,6 @@
 #include "lisp.h"
 #include "environment.h"
 
-extern ReaderClass* reader;
 extern Env globalEnvironment;
 extern Env commands;
 extern Env valueOps;
@@ -30,15 +29,16 @@ class Thunk
 :
     public Expression
 {
-private:
     int evaluated;
     Expr value;
     Env context;
 
 public:
+
     Thunk(Expression*, Environment*);
 
-    virtual void free();
+    virtual ~Thunk();
+
     virtual void print();
     virtual Expression* touch();
     virtual void eval(Expr&, Environment*, Environment*);
@@ -56,7 +56,7 @@ Thunk::Thunk(Expression* base, Environment* ctx)
     context = ctx;
 }
 
-void Thunk::free()
+Thunk::~Thunk()
 {
     context = 0;
     value = 0;
@@ -266,11 +266,10 @@ void LambdaFunction::apply(Expr& target, ListNode* args, Environment* rho)
     target = new LazyFunction(argNames, args->at(1), rho);
 }
 
-void initialize()
+ReaderClass* initialize()
 {
-
     // initialize global variables
-    reader = new LispReader;
+    ReaderClass* reader = new LispReader;
 
     // initialize the value of true
     Symbol* truesym = new Symbol("T");
@@ -304,4 +303,6 @@ void initialize()
     ge->add(new Symbol("lambda"), new LambdaFunction);
     ge->add(truesym, truesym);
     ge->add(new Symbol("nil"), emptyList());
+
+    return reader;
 }

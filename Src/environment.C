@@ -8,19 +8,18 @@ Environment::Environment
 (
     ListNode* names,
     ListNode* values,
-    Environment* link
+    Environment* parent
 )
-{
-    theNames = names;
-    theValues = values;
-    theLink = link;
-}
+:
+    names_(names),
+    values_(values),
+    parent_(parent)
+{}
 
-void Environment::free()
+Environment::~Environment()
 {
-    theNames = 0;
-    theValues = 0;
-    theLink = 0;
+    names_ = 0;
+    values_ = 0;
 }
 
 Environment* Environment::isEnvironment()
@@ -31,14 +30,14 @@ Environment* Environment::isEnvironment()
 /// EnvironmentAdd
 void Environment::add(Symbol* s, Expression* v)
 {
-    theNames = new ListNode(s, theNames.operator ListNode*());
-    theValues = new ListNode(v, theValues.operator ListNode*());
+    names_ = new ListNode(s, names_.operator ListNode*());
+    values_ = new ListNode(v, values_.operator ListNode*());
 }
 
 void Environment::set(Symbol* sym, Expression* value)
 {
-    ListNode* nameit = theNames;
-    ListNode* valueit = theValues;
+    ListNode* nameit = names_;
+    ListNode* valueit = values_;
 
     while (!nameit->isNil())
     {
@@ -51,11 +50,10 @@ void Environment::set(Symbol* sym, Expression* value)
         valueit = valueit->tail();
     }
 
-    // otherwise see if we can find it on somebody elses list
-    Environment* link = theLink;
-    if (link)
+    // Otherwise see if we can find it on somebody elses list
+    if (parent_)
     {
-        link->set(sym, value);
+        parent_->set(sym, value);
         return;
     }
 
@@ -65,25 +63,29 @@ void Environment::set(Symbol* sym, Expression* value)
 ///- EnvironmentAdd
 
 /// EnvironmentLookup
-Expression* Environment::lookup(Symbol* sym)
+Expression* Environment::lookup(const Symbol* sym)
 {
-    ListNode* nameit = theNames;
-    ListNode* valueit = theValues;
+    ListNode* nameit = names_;
+    ListNode* valueit = values_;
 
     while (!nameit->isNil())
     {
         if (*sym == nameit->head())
+        {
             return valueit->head();
+        }
+
         nameit = nameit->tail();
         valueit = valueit->tail();
     }
 
-    // otherwise see if we can find it on somebody elses list
-    Environment* link = theLink;
-    if (link)
-        return link->lookup(sym);
+    // Otherwise see if we can find it on somebody elses list
+    if (parent_)
+    {
+        return parent_->lookup(sym);
+    }
 
-    // not found, return nil value
+    // Symbol not found, return nil value
     return 0;
 }
 ///- EnvironmentLookup

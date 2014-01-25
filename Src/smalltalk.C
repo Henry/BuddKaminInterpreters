@@ -4,7 +4,6 @@
 #include "lisp.h"
 #include "environment.h"
 
-extern ReaderClass* reader;
 extern Env globalEnvironment;
 extern Env commands;
 extern Env valueOps;
@@ -27,25 +26,30 @@ class Object
 :
     public Function
 {
-private:
     Env methods;
     Env data;
+
     friend class SubclassMethod;
+
 public:
+
     Object(Environment* m, Environment* d)
     {
         methods = m;
         data = d;
     }
-    virtual void print()
-    {
-        printf("<object>");
-    }
-    virtual void free()
+
+    virtual ~Object()
     {
         methods = 0;
         data = 0;
     }
+
+    virtual void print()
+    {
+        printf("<object>");
+    }
+
     virtual void apply(Expr&, ListNode*, Environment*);
 
     // methods used by classes to create new instances
@@ -75,7 +79,7 @@ public:
         Object*,
         ListNode*,
         Environment*,
-        Environment* 
+        Environment*
     );
     virtual Method* isMethod()
     {
@@ -121,8 +125,14 @@ void Object::apply(Expr& target, ListNode* args, Environment* rho)
     meth->doMethod(target, this, args->tail(), data, rho);
 }
 
-void Method::doMethod(Expr& target, Object* self, ListNode* args,
-Environment* ctx, Environment* rho)
+void Method::doMethod
+(
+    Expr& target,
+    Object* self,
+    ListNode* args,
+    Environment* ctx,
+    Environment* rho
+)
 {
     // change the exectution context
     context = ctx;
@@ -177,13 +187,20 @@ class IntegerObject
 :
     public Object
 {
-private:
     Expr value;
+
 public:
+
     IntegerObject(int v):Object(IntegerMethods, 0)
     {
         value = new IntegerExpression(v);
     }
+
+    virtual ~IntegerObject()
+    {
+        value = 0;
+    }
+
     virtual void print()
     {
         if (value())
@@ -191,10 +208,7 @@ public:
             value()->print();
         }
     }
-    virtual void free()
-    {
-        value = 0;
-    }
+
     virtual IntegerExpression* isInteger()
     {
         return value()->isInteger();
@@ -206,20 +220,33 @@ class IntegerBinaryMethod
 :
     public Method
 {
-private:
     int (*fun) (int, int);
 
 public:
+
     IntegerBinaryMethod(int (*thefun) (int, int))
     {
         fun = thefun;
     }
-    virtual void doMethod(Expr&, Object*, ListNode*,
-    Environment*, Environment*);
+
+    virtual void doMethod
+    (
+        Expr&,
+        Object*,
+        ListNode*,
+        Environment*,
+        Environment*
+    );
 };
 
-void IntegerBinaryMethod::doMethod(Expr& target, Object* self,
-ListNode* args, Environment* ctx, Environment* rho)
+void IntegerBinaryMethod::doMethod
+(
+    Expr& target,
+    Object* self,
+    ListNode* args,
+    Environment* ctx,
+    Environment* rho
+)
 {
     if (args->length() != 1)
     {
@@ -243,6 +270,7 @@ class SmalltalkSymbol
     public Symbol
 {
 public:
+
     SmalltalkSymbol(const Symbol& sym)
     :
         Symbol(sym)
@@ -259,14 +287,16 @@ class IfMethod
 :
     public Method
 {
+
 public:
+
     virtual void doMethod
     (
         Expr&,
         Object*,
         ListNode*,
         Environment*,
-        Environment* 
+        Environment*
     );
 };
 
@@ -357,8 +387,14 @@ class NewMethod
     public Method
 {
 public:
-    virtual void doMethod(Expr&, Object*, ListNode*,
-    Environment*, Environment*);
+    virtual void doMethod
+    (
+        Expr&,
+        Object*,
+        ListNode*,
+        Environment*,
+        Environment*
+    );
 };
 
 /// SmalltalkNewMethodDoMethod
@@ -397,8 +433,14 @@ class SubclassMethod
     public Method
 {
 public:
-    virtual void doMethod(Expr&, Object*, ListNode*,
-    Environment*, Environment*);
+    virtual void doMethod
+    (
+        Expr&,
+        Object*,
+        ListNode*,
+        Environment*,
+        Environment*
+    );
 };
 
 /// SmalltalkSubclassMethod
@@ -449,7 +491,7 @@ public:
         Object*,
         ListNode*,
         Environment*,
-        Environment* 
+        Environment*
     );
 };
 
@@ -496,10 +538,10 @@ void MethodMethod::doMethod
 ///- SmalltalkMethodMethodDoMethod
 
 /// SmalltalkInitialize
-void initialize()
+ReaderClass* initialize()
 {
     // initialize global variables
-    reader = new SmalltalkReader;
+    ReaderClass* reader = new SmalltalkReader;
 
     // the only commands are the assignment command and begin
     Environment* vo = valueOps;
@@ -534,5 +576,7 @@ void initialize()
     im->add(new Symbol(">"), new IntegerBinaryMethod(GreaterThanFunction));
     im->add(new Symbol("if"), new IfMethod);
     ge->add(new Symbol("Integer"), new Object(objClassMethods, objData));
+
+    return reader;
 }
 ///- SmalltalkInitialize

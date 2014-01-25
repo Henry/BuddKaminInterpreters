@@ -3,7 +3,6 @@
 #include "environment.h"
 #include "lisp.h"
 
-extern ReaderClass* reader;
 extern Env globalEnvironment;
 extern Env commands;
 extern Env valueOps;
@@ -25,10 +24,10 @@ int isTrue(Expression* cond)
 ///- BasicLispIsTrue
 
 /// BasicLispInitialize
-void initialize()
+ReaderClass* initialize()
 {
     // initialize global variables
-    reader = new ReaderClass;
+    ReaderClass* reader = new ReaderClass;
 
     // initialize the statement environment
     Environment* cmds = commands;
@@ -48,5 +47,7 @@ void initialize()
     vo->add(new Symbol("<"), new IntegerBinaryFunction(LessThanFunction));
     vo->add(new Symbol(">"), new IntegerBinaryFunction(GreaterThanFunction));
     vo->add(new Symbol("print"), new UnaryFunction(PrintFunction));
+
+    return reader;
 }
 ///- BasicLispInitialize

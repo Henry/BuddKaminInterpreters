@@ -2,8 +2,6 @@
 #include "environment.h"
 #include "lisp.h"
 
-extern ReaderClass* reader;
-
 extern Env globalEnvironment;
 extern Env commands;
 extern Env valueOps;
@@ -24,11 +22,11 @@ int isTrue(Expression* cond)
 ///- LispIsTrue
 
 /// LispInitialize
-void initialize()
+ReaderClass* initialize()
 {
 
     // create the reader/parser
-    reader = new LispReader;
+    ReaderClass* reader = new LispReader;
 
     // initialize the global environment
     Symbol* truesym = new Symbol("T");
@@ -64,5 +62,7 @@ void initialize()
     vo->add(new Symbol("list?"), new BooleanUnary(ListpFunction));
     vo->add(new Symbol("null?"), new BooleanUnary(NullpFunction));
     vo->add(new Symbol("print"), new UnaryFunction(PrintFunction));
+
+    return reader;
 }
 ///- LispInitialize

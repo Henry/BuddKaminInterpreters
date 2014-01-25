@@ -13,16 +13,17 @@ class QuotedConst
 :
     public Expression
 {
-private:
     Expr theValue;
 
 public:
+
     QuotedConst(Expression* val)
     {
         theValue = val;
     }
 
-    virtual void free();
+    virtual ~QuotedConst();
+
     virtual void eval(Expr&, Environment*, Environment*);
     virtual void print();
 };

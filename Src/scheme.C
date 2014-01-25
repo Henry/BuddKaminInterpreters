@@ -1,7 +1,6 @@
 #include "environment.h"
 #include "lisp.h"
 
-extern ReaderClass* reader;
 extern Env globalEnvironment;
 extern Env commands;
 extern Env valueOps;
@@ -56,11 +55,11 @@ void LambdaFunction::apply(Expr& target, ListNode* args, Environment* rho)
 ///- SchemeLambdaFunction
 
 /// SchemeInitialize
-void initialize()
+ReaderClass* initialize()
 {
 
     // initialize global variables
-    reader = new LispReader;
+    ReaderClass* reader = new LispReader;
 
     // initialize the value of true
     Symbol* truesym = new Symbol("T");
@@ -96,5 +95,7 @@ void initialize()
     ge->add(new Symbol("lambda"), new LambdaFunction);
     ge->add(truesym, truesym);
     ge->add(new Symbol("nil"), emptyList());
+
+    return reader;
 }
 ///- SchemeInitialize

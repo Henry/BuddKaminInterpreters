@@ -3,49 +3,70 @@
 
 #include "list.h"
 
-//
-//      Env is a shadow to Expr to perform memory management
-//
-
 // Forward declarations
 class Symbol;
 
 /// Environment
+// Reference-counted wrapper around Environment
 class Env
 :
     public Expr
 {
 public:
-    operator Environment*();
-    void operator=(Environment* r);
+
+    inline Env();
+    inline Env(Environment* r);
+    inline operator Environment*();
+    inline void operator=(Environment* r);
 };
 
 class Environment
 :
     public Expression
 {
-    List theNames;
-    List theValues;
-    Env theLink;
+    //- Symbols
+    List names_;
+
+    //- Values associated with the symbols
+    List values_;
+
+    //- Link to parent environment
+    Environment* parent_;
 
 public:
 
+    //- Construct from components
     Environment(ListNode*, ListNode*, Environment*);
 
-    // overridden methods
-    virtual void free();
+    //- Delete according to reference counts
+    virtual ~Environment();
+
+    //- Specialised type predicate
     virtual Environment* isEnvironment();
 
-    // new methods
-    Expression* lookup(Symbol*);
+    //- Lookup symbol in
+    Expression* lookup(const Symbol*);
+
+    //- Add symbol with expression to the environment
     void add(Symbol*, Expression*);
+
+    //- Set symbol to expression in the environment
     void set(Symbol*, Expression*);
 };
 ///- Environment
 
-//
-//      now define the methods for class Env
-//
+
+// Member functions for class Env
+
+inline Env::Env()
+:
+    Expr(0)
+{}
+
+inline Env::Env(Environment* r)
+{
+    Expr::operator=(r);
+}
 
 inline Env::operator Environment*()
 {

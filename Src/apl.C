@@ -8,7 +8,6 @@
 //      uses isdigit from ctypes
 #include <ctype.h>
 
-extern ReaderClass* reader;
 extern Env globalEnvironment;
 extern Env commands;
 extern Env valueOps;
@@ -18,10 +17,17 @@ extern List emptyList;
 //
 //      isTrue is not used, but must be defined
 //
-int isTrue(Expression* x)
+int isTrue(Expression* cond)
 {
-    error("isTrue invoked??");
-    return 0;
+    //error("isTrue invoked??");
+    //return 0;
+    IntegerExpression* ival = cond->isInteger();
+
+    if (ival && ival->val() == 0)
+    {
+        return 0;
+    }
+    return 1;
 }
 
 //
@@ -33,17 +39,17 @@ class APLValue
 :
     public Expression
 {
-private:
     List shapedata;
     int* data;
 
 public:
+
     APLValue(ListNode*, int);
     APLValue(int);          // for vectors
+    virtual ~APLValue();
 
     // the overridden methods
     virtual APLValue* isAPLValue();
-    virtual void free();
     virtual void print();
 
     // methods unique to apl values
@@ -69,12 +75,26 @@ APLValue::APLValue(ListNode* s, int size)
 {
     shapedata = s;
     data = new int[size];
+    for (int i = 0; i < size; i++)
+    {
+        data[i] = 0;
+    }
 }
 
 APLValue::APLValue(int size)
 {
     shapedata = new ListNode(new IntegerExpression(size), emptyList());
     data = new int[size];
+    for (int i = 0; i < size; i++)
+    {
+        data[i] = 0;
+    }
+}
+
+APLValue::~APLValue()
+{
+    shapedata = 0;
+    delete[] data;
 }
 
 APLValue* APLValue::isAPLValue()
@@ -82,17 +102,8 @@ APLValue* APLValue::isAPLValue()
     return this;
 }
 
-void APLValue::free()
-{
-    shapedata = 0;
-    // ?? delete data;
-}
-
 void APLValue::print()
 {
-    int i, j;
-    int len, len1, len2;
-
     switch (shape()->length())
     {
         case 0:        // scalar values
@@ -100,21 +111,30 @@ void APLValue::print()
             break;
 
         case 1:        // vector values
-            len = size();
-            for (i = 0; i < len; i++)
+        {
+            int len = size();
+            for (int i = 0; i < len; i++)
+            {
                 printf("%d ", at(i));
+            }
             break;
+        }
 
         case 2:        // matrix values
-            len1 = shapeAt(0);
-            len2 = shapeAt(1);
-            for (i = 0; i < len1; i++)
+        {
+            int len1 = shapeAt(0);
+            int len2 = shapeAt(1);
+            for (int i = 0; i < len1; i++)
             {
-                for (j = 0; j < len2; j++)
-                    printf("%d ", at(i* len2 + j));
+                for (int j = 0; j < len2; j++)
+                {
+                    printf("%d ", at(i*len2 + j));
+                }
                 printf("\n");
             }
             break;
+        }
+
         default:
             printf("rank is %d\n", shape()->length());
             error("unknown rank in apl value printing");
@@ -853,11 +873,10 @@ void SubscriptFunction::applyOp
 ///- APLSubscriptFunction
 
 /// APLInitialize
-void initialize()
+ReaderClass* initialize()
 {
-
     // initialize global variables
-    reader = new APLreader;
+    ReaderClass* reader = new APLreader;
 
     // initialize the statement environment
     Environment* cmds = commands;
@@ -865,6 +884,8 @@ void initialize()
 
     // initialize the value ops environment
     Environment* vo = valueOps;
+    vo->add(new Symbol("if"), new IfStatement);
+    vo->add(new Symbol("begin"), new BeginStatement);
     vo->add(new Symbol("set"), new SetStatement);
     vo->add(new Symbol("+"), new APLScalarFunction(PlusFunction));
     vo->add(new Symbol("-"), new APLScalarFunction(MinusFunction));
@@ -892,5 +913,7 @@ void initialize()
     vo->add(new Symbol("trans"), new TransposeFunction);
     vo->add(new Symbol("[]"), new SubscriptFunction);
     vo->add(new Symbol("print"), new UnaryFunction(PrintFunction));
+
+    return reader;
 }
 ///- APLInitialize

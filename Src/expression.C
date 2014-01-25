@@ -10,12 +10,33 @@
 
 /// ExprAssign
 Expr::Expr(Expression* val)
+:
+    value(val)
 {
-    value = val;
-    if (val)
+    if (value)
     {
         value->referenceCount++;
     }
+}
+
+Expr::Expr()
+:
+    value(0)
+{}
+
+Expr::Expr(Expr& val)
+:
+    value(val.value)
+{
+    if (value)
+    {
+        value->referenceCount++;
+    }
+}
+
+Expr::~Expr()
+{
+    operator=(0);
 }
 
 void Expr::operator=(Expression* newvalue)
@@ -32,7 +53,6 @@ void Expr::operator=(Expression* newvalue)
         value->referenceCount--;
         if (value->referenceCount == 0)
         {
-            value->free();
             delete value;
         }
     }
@@ -44,7 +64,7 @@ void Expr::operator=(Expression* newvalue)
 
 void Expr::evalAndPrint(Environment* valueops, Environment* rho)
 {
-    Expr target = 0;
+    Expr target(0);
 
     // if we have a valid expression, evaluate it
     if (value)
@@ -57,9 +77,6 @@ void Expr::evalAndPrint(Environment* valueops, Environment* rho)
     {
         target()->print();
     }
-
-    // force memory management
-    target = 0;
 }
 
 #if 0
@@ -82,7 +99,7 @@ Expression::Expression()
     referenceCount = 0;
 }
 
-void Expression::free()
+Expression::~Expression()
 {
     // do nothing
 }
@@ -191,7 +208,7 @@ Symbol::Symbol(const char* t)
     strcpy(text, t);
 }
 
-void Symbol::free()
+Symbol::~Symbol()
 {
     delete[] text;
 }

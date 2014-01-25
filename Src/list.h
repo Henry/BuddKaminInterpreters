@@ -19,13 +19,9 @@ public:
 
     ListNode(Expression*, Expression*);
 
-    virtual ~ListNode()
-    {
-        free();
-    }
+    virtual ~ListNode();
 
     // overridden methods
-    virtual void free();
     virtual void eval(Expr&, Environment*, Environment*);
     virtual void print();
     virtual ListNode* isList();
@@ -53,6 +49,14 @@ class List
     public Expr
 {
 public:
+
+    List()
+    {}
+
+    List(ListNode* r)
+    {
+        Expr::operator=(r);
+    }
 
     operator ListNode*()
     {

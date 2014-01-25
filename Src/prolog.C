@@ -3,8 +3,6 @@
 
 #include "lisp.h"
 
-extern ReaderClass* reader;
-
 extern Env globalEnvironment;
 extern Env commands;
 extern Env valueOps;
@@ -34,13 +32,17 @@ public:
         data = d;
     }
 
-    virtual void print();
-    virtual void free()
+    virtual ~PrologValue()
     {
         data = 0;
     }
+
+    virtual void print();
+
     virtual void eval(Expr&, Environment*, Environment*);
+
     virtual Symbol* isSymbol();
+
     virtual PrologValue* isPrologValue()
     {
         return this;
@@ -50,11 +52,14 @@ public:
     {
         return data() == 0;
     }
+
     void setUndefined()
     {
         data = 0;
     }
+
     PrologValue* indirectPtr();
+
     void setIndirect(PrologValue* v)
     {
         data = v;
@@ -189,21 +194,23 @@ class ComposeContinuation
 :
     public Continuation
 {
-private:
     Expr left;
     Expr right;
 
 public:
+
     ComposeContinuation(Expression* a, Expression* b)
     {
         left = a;
         right = b;
     }
-    virtual void free()
+
+    virtual ~ComposeContinuation()
     {
         left = 0;
         right = 0;
     }
+
     virtual int withContinuation(Continuation*);
 };
 
@@ -225,17 +232,20 @@ class AndContinuation
 :
     public Continuation
 {
-private:
     List relArgs;
+
 public:
+
     AndContinuation(ListNode* args)
     {
         relArgs = args;
     }
-    virtual void free()
+
+    virtual ~AndContinuation()
     {
         relArgs = 0;
     }
+
     virtual int withContinuation(Continuation*);
 };
 
@@ -249,9 +259,9 @@ int AndContinuation::withContinuation(Continuation* future)
         newrel = new ComposeContinuation(args->at(i), newrel);
     }
 
-    Expr p = newrel;            // for gc purposes
+    Expr p(newrel);            // for gc purposes
     int result = newrel->withContinuation(nothing);
-    p = 0;
+    // p = 0;
     return result;
 }
 ///- PrologAndContinuation
@@ -261,18 +271,20 @@ class OrContinuation
 :
     public Continuation
 {
-private:
     List relArgs;
 
 public:
+
     OrContinuation(ListNode* args)
     {
         relArgs = args;
     }
-    virtual void free()
+
+    virtual ~OrContinuation()
     {
         relArgs = 0;
     }
+
     virtual int withContinuation(Continuation*);
 };
 
@@ -350,20 +362,23 @@ class UnifyContinuation
 :
     public Continuation
 {
-private:
     Expr left;
     Expr right;
+
 public:
+
     UnifyContinuation(Expression* a, Expression* b)
     {
         left = a;
         right = b;
     }
-    virtual void free()
+
+    virtual ~UnifyContinuation()
     {
         left = 0;
         right = 0;
     }
+
     virtual int withContinuation(Continuation*);
 };
 
@@ -405,7 +420,6 @@ class PrintContinuation
 :
     public Continuation
 {
-private:
     Expr val;
 
 public:
@@ -415,7 +429,7 @@ public:
         val = x;
     }
 
-    virtual void free()
+    virtual ~PrintContinuation()
     {
         val = 0;
     }
@@ -509,7 +523,7 @@ void QueryStatement::apply(Expr& target, ListNode* args, Environment* rho)
     }
 
     // we make a new environment to isolate any new variables defined
-    Environment* newrho = new Environment(emptyList, emptyList, rho);
+    Env newrho(new Environment(emptyList, emptyList, rho));
 
     args->at(0)->eval(target, valueOps, newrho);
 
@@ -533,16 +547,14 @@ void QueryStatement::apply(Expr& target, ListNode* args, Environment* rho)
     {
         target = new Symbol("not ok");
     }
-
-    newrho = 0; // force memory management
 }
 ///- PrologQueryStatement
 
 /// PrologInitialize
-void initialize()
+ReaderClass* initialize()
 {
     // create the reader/parser
-    reader = new PrologReader;
+    ReaderClass* reader = new PrologReader;
 
     // make the empty relation
     nothing = new Continuation;
@@ -558,5 +570,7 @@ void initialize()
     Environment* cmds = commands;
     cmds->add(new Symbol("define"), new DefineStatement);
     cmds->add(new Symbol("query"), new QueryStatement);
+
+    return reader;
 }
 ///- PrologInitialize

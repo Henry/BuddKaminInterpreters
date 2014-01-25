@@ -7,15 +7,13 @@
 #include <stdio.h>
 
 // Forward definitions
-extern void initialize();
+extern ReaderClass* initialize();
 
 // Definitions of global environments
-
+List emptyList;
 Env globalEnvironment;          // global symbols
 Env valueOps;                   // built-in operations
 Env commands;                   // top level commands
-
-List emptyList;
 
 // The following globals are defined in the ``initialization'' routine
 ReaderClass* reader;
@@ -34,7 +32,7 @@ int main()
     commands = new Environment(emptyList, emptyList, valueOps);
 
     // Interpreter-specific initialization (sets reader pointer)
-    initialize();
+    reader = initialize();
 
     // Now the read-eval-print loop
     while (1)
@@ -53,19 +51,13 @@ int main()
         entered.evalAndPrint(commands, globalEnvironment);
     }
 
-    trueExpr = 0;
-    falseExpr = 0;
-
     // Delete the dynamically-allocated reader
     delete reader;
 
-    // Unset all reference-counted object to cause destruction
-    entered = 0;
-    commands = 0;
-    valueOps = 0;
-    globalEnvironment.operator Environment*()->free();
-    delete globalEnvironment.operator Environment*();
-    emptyList = 0;
+    // Explicitly free the globalEnvironment
+    // because there is a reference counting problem with it
+    // globalEnvironment.operator Environment*()->free();
+    // delete globalEnvironment.operator Environment*();
 
     return 0;
 }

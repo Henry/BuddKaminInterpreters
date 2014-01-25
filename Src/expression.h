@@ -8,8 +8,6 @@ class Expression;
 /// Expr
 class Expr
 {
-private:
-
     Expression* value;
 
 protected:
@@ -21,7 +19,13 @@ protected:
 
 public:
 
-    Expr(Expression* = 0);
+    Expr();
+
+    Expr(Expression*);
+
+    Expr(Expr&);
+
+    ~Expr();
 
     Expression* operator()()
     {
@@ -48,18 +52,13 @@ class Continuation;
 /// Expression
 class Expression
 {
-    public:
-//private:
     friend class Expr;
     mutable int referenceCount;
 
 public:
     Expression();
 
-    virtual ~Expression()
-    {}
-
-    virtual void free();
+    virtual ~Expression();
 
     // basic object protocol
     virtual void eval(Expr&, Environment*, Environment*);
@@ -115,14 +114,21 @@ private:
 public:
     Symbol(const char*);
 
-    virtual void free();
+    virtual ~Symbol();
+
     virtual void eval(Expr&, Environment*, Environment*);
     virtual void print();
     virtual Symbol* isSymbol();
 
     int operator==(Expression*) const;
     int operator==(const char*) const;
+
     char* chars()
+    {
+        return text;
+    }
+
+    const char* chars() const
     {
         return text;
     }

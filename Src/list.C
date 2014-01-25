@@ -11,7 +11,7 @@ ListNode::ListNode(Expression* car, Expression* cdr)
     t = cdr;
 }
 
-void ListNode::free()
+ListNode::~ListNode()
 {
     h = 0;
     t = 0;
@@ -87,7 +87,7 @@ void ListNode::eval(Expr& target, Environment* valueops, Environment* rho)
     Expression* firstarg = head();
     Expression* fun = 0;
 
-    Symbol* name = firstarg->isSymbol();
+    const Symbol* name = firstarg->isSymbol();
     if (name)
     {
         fun = valueops->lookup(name);

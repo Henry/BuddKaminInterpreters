@@ -102,13 +102,16 @@ class UserFunction
     public Function
 {
 protected:
+
     List argNames;
     Expr body;
-    Env context;
+    Environment* context;
+    Env local_;
 
 public:
     UserFunction(ListNode*, Expression*, Environment*);
-    virtual void free();
+    UserFunction(ListNode*, Expression*, Env&);
+    virtual ~UserFunction();
     virtual void applyWithArgs(Expr&, ListNode*, Environment*);
     virtual int isClosure();
 };
