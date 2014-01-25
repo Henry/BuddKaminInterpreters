@@ -137,7 +137,7 @@ void Selector::applyWithArgs(Expr& target, ListNode* args, Environment* rho)
     target = x->lookup(s);
     if (!target())
     {
-        error("selector cannot find symbol:", s->chars());
+        error("selector cannot find symbol:", s->name());
     }
 }
 
@@ -198,9 +198,9 @@ static void catset
     char buffer[120];
 
     // catenate the two symbols
-    strcpy(buffer, left->chars());
+    strcpy(buffer, left->name());
     strcat(buffer, mid);
-    strcat(buffer, right->chars());
+    strcat(buffer, right->name());
 
     // now put the new value into rho
     rho->add(new Symbol(buffer), val);

@@ -208,7 +208,7 @@ static ListNode* makeThunks(ListNode* args, Environment* rho)
 void LazyFunction::apply(Expr& target, ListNode* args, Environment* rho)
 {
     // number of args should match definition
-    ListNode* anames = argNames;
+    ListNode* anames = argNames_;
     if (anames->length() != args->length())
     {
         error("argument length mismatch");
@@ -219,12 +219,12 @@ void LazyFunction::apply(Expr& target, ListNode* args, Environment* rho)
     ListNode* newargs = makeThunks(args, rho);
 
     // make new environment
-    Environment* newrho = new Environment(anames, newargs, context);
+    Environment* newrho = new Environment(anames, newargs, context_);
 
     // evaluate body in new environment
-    if (body())
+    if (body_())
     {
-        body()->eval(target, valueOps, newrho);
+        body_()->eval(target, valueOps, newrho);
     }
     else
     {

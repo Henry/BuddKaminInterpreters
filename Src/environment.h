@@ -1,13 +1,26 @@
-#ifndef environment
-#define environment
+// -----------------------------------------------------------------------------
+//  This file is part of
+/// ---     Timothy Budd's Kamin Interpreters in C++
+// -----------------------------------------------------------------------------
+/// Title: The Environment
+///  Description:
+//    Environment holds the symbols, values and link to parent environment.
+//    Env is a reference-counting wrapper around Environment for GC
+// -----------------------------------------------------------------------------
+
+#ifndef Environment_H
+#define Environment_H
 
 #include "list.h"
 
-// Forward declarations
+// -----------------------------------------------------------------------------
+/// Forward declarations
+// -----------------------------------------------------------------------------
 class Symbol;
 
+// -----------------------------------------------------------------------------
 /// Environment
-// Reference-counted wrapper around Environment
+// -----------------------------------------------------------------------------
 class Env
 :
     public Expr
@@ -55,8 +68,9 @@ public:
 };
 ///- Environment
 
-
-// Member functions for class Env
+// -----------------------------------------------------------------------------
+/// Member functions for class Env
+// -----------------------------------------------------------------------------
 
 inline Env::Env()
 :
@@ -78,4 +92,6 @@ inline void Env::operator=(Environment* r)
     Expr::operator=(r);
 }
 
-#endif
+// -----------------------------------------------------------------------------
+#endif // Environment_H
+// -----------------------------------------------------------------------------

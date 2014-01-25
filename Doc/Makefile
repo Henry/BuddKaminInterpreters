@@ -65,6 +65,7 @@ listingLines.tex: ${C_FILES:%=../Src/%}
 	@$(foreach cfile, $(C_FILES), \
 		echo "Scanning " $(cfile); \
 		cat ../Src/$(cfile) --number | grep "/// " | \
+		egrep -v -e "/// ---|Title|Description|Forward|Member" | \
 		awk '{printf "\\newcommand*{\\%sfirstline}{%d}\n", $$3, $$1+1}' \
 			>> listingLines.tex;\
 		cat ../Src/$(cfile) --number | grep "///- " | \

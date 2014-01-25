@@ -1,44 +1,21 @@
-#ifndef expressionh
-#define expressionh
+// -----------------------------------------------------------------------------
+//  This file is part of
+/// ---     Timothy Budd's Kamin Interpreters in C++
+// -----------------------------------------------------------------------------
+/// Title: Exrpessions
+///  Description:
+//    Expression is the reference counted base-class for all expressions
+//    Expr is a reference-counting wrapper around Expression for GC
+// -----------------------------------------------------------------------------
 
-// forward references
+#ifndef Expression_H
+#define Expression_H
+
+// -----------------------------------------------------------------------------
+/// Forward declarations
+// -----------------------------------------------------------------------------
 class Environment;
 class Expression;
-
-/// Expr
-class Expr
-{
-    Expression* value;
-
-protected:
-
-    Expression* val()
-    {
-        return value;
-    }
-
-public:
-
-    Expr();
-
-    Expr(Expression*);
-
-    Expr(Expr&);
-
-    ~Expr();
-
-    Expression* operator()()
-    {
-        return val();
-    }
-
-    void operator=(Expression*);
-
-    void evalAndPrint(Environment*, Environment*);
-};
-///- Expr
-
-// more forward declarations
 class IntegerExpression;
 class Symbol;
 class ListNode;
@@ -49,22 +26,76 @@ class Method;
 class PrologValue;
 class Continuation;
 
+// -----------------------------------------------------------------------------
+/// Expr
+// -----------------------------------------------------------------------------
+class Expr
+{
+    //- The expression
+    Expression* value_;
+
+protected:
+
+    //- Return the expression
+    Expression* val()
+    {
+        return value_;
+    }
+
+public:
+
+    //- Construct null setting the value to 0
+    Expr();
+
+    //- Construct from given expression
+    Expr(Expression*);
+
+    //- Construct copy incrementing reference count
+    Expr(Expr&);
+
+    //- Delete according to reference counts
+    ~Expr();
+
+    //- Return the expression
+    Expression* operator()()
+    {
+        return value_;
+    }
+
+    //- Set/reset expression
+    void operator=(Expression*);
+
+    //- Evaluate and print the expression
+    void evalAndPrint(Environment*, Environment*);
+};
+///- Expr
+
+
+// -----------------------------------------------------------------------------
 /// Expression
+// -----------------------------------------------------------------------------
 class Expression
 {
-    friend class Expr;
+    //- The reference-count for GC
     mutable int referenceCount;
 
 public:
+
+    friend class Expr;
+
+    //- Construct null
     Expression();
 
+    //- Delete according to reference counts
     virtual ~Expression();
 
-    // basic object protocol
+    //- Evaluate expression
     virtual void eval(Expr&, Environment*, Environment*);
+
+    //- Print
     virtual void print();
 
-    // conversion tests
+    // Conversion/type predicates
     virtual Expression* touch();
     virtual IntegerExpression* isInteger();
     virtual Symbol* isSymbol();
@@ -79,62 +110,85 @@ public:
 };
 ///- Expression
 
+
+// -----------------------------------------------------------------------------
 /// IntegerExpression
+// -----------------------------------------------------------------------------
 class IntegerExpression
 :
     public Expression
 {
-private:
-    int value;
+    //- The integer value
+    int value_;
 
 public:
-    IntegerExpression(int v)
+
+    //- Construct
+    IntegerExpression(const int v)
     {
-        value = v;
+        value_ = v;
     }
 
-    virtual void print();
+    //- Specialised type predicate
     virtual IntegerExpression* isInteger();
 
+    //- Return the integer value
     int val()
     {
-        return value;
+        return value_;
     }
+
+    //- Print
+    virtual void print();
+
 };
 ///- IntegerExpression
 
+
+// -----------------------------------------------------------------------------
 /// Symbol
+// -----------------------------------------------------------------------------
 class Symbol
 :
     public Expression
 {
-private:
-    char* text;
+    //- The symbol name
+    char* name_;
 
 public:
-    Symbol(const char*);
 
+    //- Construct given the name
+    Symbol(const char* name);
+
+    //- Destructor which deletes the name
     virtual ~Symbol();
 
+    //- Evaluate the symbol
     virtual void eval(Expr&, Environment*, Environment*);
+
+    //- Print
     virtual void print();
+
+    //- Specialised type predicate
     virtual Symbol* isSymbol();
 
+    //- Compare with the given expression
     int operator==(Expression*) const;
+
+    //- Compare with the given name
     int operator==(const char*) const;
 
-    char* chars()
+    //- Return the symbol's name
+    const char* name() const
     {
-        return text;
-    }
-
-    const char* chars() const
-    {
-        return text;
+        return name_;
     }
 };
 ///- Symbol
 
+//- Generate an error expression
 Expression* error(const char*, const char* x = 0);
 
-#endif
+// -----------------------------------------------------------------------------
+#endif // Expression_H
+// -----------------------------------------------------------------------------

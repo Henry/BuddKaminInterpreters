@@ -1,48 +1,71 @@
-#ifndef LIST_H
-#define LIST_H
+// -----------------------------------------------------------------------------
+//  This file is part of
+/// ---     Timothy Budd's Kamin Interpreters in C++
+// -----------------------------------------------------------------------------
+/// Title: Linked-list
+///  Description:
+//    ListNode element of a linked-list
+//    List is a reference-counted wrapper around ListNode for GC
+// -----------------------------------------------------------------------------
+
+#ifndef List_H
+#define List_H
 
 #include "expression.h"
 
-// Class List is used to gc list structures
-
+// -----------------------------------------------------------------------------
 /// List
+// -----------------------------------------------------------------------------
 class ListNode
 :
     public Expression
 {
-protected:
+    //- The head element of cons-cell
+    Expr head_;
 
-    Expr h;                     // the head field
-    Expr t;                     // the tail field
+    //- The tail element of a cons-cell
+    Expr tail_;
+
 
 public:
 
+    //- Construct from the head and tail elements
     ListNode(Expression*, Expression*);
 
+    //- Delete according to reference counts
     virtual ~ListNode();
 
-    // overridden methods
+    //- Evaluate the list
     virtual void eval(Expr&, Environment*, Environment*);
-    virtual void print();
-    virtual ListNode* isList();
 
-    // list specific methods
-    int isNil();
-    int length();
-    Expression* at(int);
-
+    //- Return the head
     virtual Expression* head()
     {
-        return h();
+        return head_();
     }
 
-    void head(Expression* x)
-    {
-        h = x;
-    }
+    //- Set the head
+    void head(Expression* x);
 
+    //- Return the tail
     ListNode* tail();
+
+    //- Specialised type predicate
+    virtual ListNode* isList();
+
+    //- Empty list predicate
+    int isNil();
+
+    //- Return the number of elements in the list O(1)
+    int length();
+
+    //- Return element at index
+    Expression* at(const int index);
+
+    //- Print
+    virtual void print();
 };
+
 
 class List
 :
@@ -50,24 +73,29 @@ class List
 {
 public:
 
+    //- Null constructor
     List()
     {}
 
+    //- Construct from ListNode incrementing reference-count
     List(ListNode* r)
     {
         Expr::operator=(r);
     }
 
-    operator ListNode*()
-    {
-        return val() ? val()->isList() : 0;
-    }
-
+    //- Return the ListNode* if set
     ListNode* operator()()
     {
         return val() ? val()->isList() : 0;
     }
 
+    //- Cast to ListNode
+    operator ListNode*()
+    {
+        return operator()();
+    }
+
+    //- Set/reset the ListNode
     void operator=(ListNode* r)
     {
         Expr::operator=(r);
@@ -75,4 +103,16 @@ public:
 };
 ///- List
 
-#endif
+
+// -----------------------------------------------------------------------------
+/// Member functions for class ListNode
+// -----------------------------------------------------------------------------
+
+inline void ListNode::head(Expression* x)
+{
+    head_ = x;
+}
+
+// -----------------------------------------------------------------------------
+#endif // List_H
+// -----------------------------------------------------------------------------

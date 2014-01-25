@@ -76,13 +76,13 @@ void UnaryFunction::applyWithArgs
     Environment* rho
 )
 {
-    if (!fun)
+    if (!function_)
     {
         target = error("unaryfunction apply and no function");
     }
     else
     {
-        fun(target, args->at(0));
+        function_(target, args->at(0));
     }
 }
 
@@ -108,13 +108,13 @@ void BinaryFunction::applyWithArgs
     Environment* rho
 )
 {
-    if (!fun)
+    if (!function_)
     {
         target = error("binary function apply and no function");
     }
     else
     {
-        fun(target, args->at(0), args->at(1));
+        function_(target, args->at(0), args->at(1));
     }
 }
 
@@ -138,7 +138,7 @@ void IntegerBinaryFunction::applyWithArgs
         return;
     }
 
-    target = new IntegerExpression(fun(left->isInteger()->val(),
+    target = new IntegerExpression(function_(left->isInteger()->val(),
     right->isInteger()->val()));
 }
 ///- IntegerBinaryFunctionApply
@@ -163,7 +163,7 @@ void BooleanBinaryFunction::applyWithArgs
         return;
     }
 
-    if (fun(left->isInteger()->val(), right->isInteger()->val()))
+    if (function_(left->isInteger()->val(), right->isInteger()->val()))
     {
         target = trueExpr();
     }
@@ -180,24 +180,15 @@ void BooleanBinaryFunction::applyWithArgs
 
 UserFunction::UserFunction(ListNode* anames, Expression* bod, Environment* ctx)
 :
-    argNames(anames),
-    body(bod),
-    context(ctx)
-{}
-
-UserFunction::UserFunction(ListNode* anames, Expression* bod, Env& ctx)
-:
-    argNames(anames),
-    body(bod),
-    context(ctx),
-    local_(ctx)
+    argNames_(anames),
+    body_(bod),
+    context_(ctx)
 {}
 
 UserFunction::~UserFunction()
 {
-    argNames = 0;
-    body = 0;
-    local_ = 0;
+    argNames_ = 0;
+    body_ = 0;
 }
 
 int UserFunction::isClosure()
@@ -214,18 +205,18 @@ void UserFunction::applyWithArgs
 )
 {
     // number of args should match definition
-    ListNode* an = argNames;
+    ListNode* an = argNames_;
     if (an->length() != args->length())
     {
-        error("argument length mismatch");
+        target = error("argument length mismatch");
         return;
     }
 
     // make new environment
-    Env newrho(new Environment(an, args, context));
+    Env newrho(new Environment(an, args, context_));
 
     // evaluate body in new environment
-    Expression* bod = body();
+    Expression* bod = body_();
     if (bod)
     {
         bod->eval(target, valueOps, newrho);

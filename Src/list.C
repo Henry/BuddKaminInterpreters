@@ -6,21 +6,21 @@
 #include "environment.h"
 
 ListNode::ListNode(Expression* car, Expression* cdr)
-{
-    h = car;
-    t = cdr;
-}
+:
+    head_(car),
+    tail_(cdr)
+{}
 
 ListNode::~ListNode()
 {
-    h = 0;
-    t = 0;
+    head_ = 0;
+    tail_ = 0;
 }
 
 int ListNode::isNil()
 {
     // we are nil if we have no value and no rest of list
-    return h() == 0 && t() == 0;
+    return head_() == 0 && tail_() == 0;
 }
 
 int ListNode::length()
@@ -39,7 +39,7 @@ int ListNode::length()
     return 0;
 }
 
-Expression* ListNode::at(int index)
+Expression* ListNode::at(const int index)
 {
     if (index <= 0)
     {
@@ -58,13 +58,13 @@ Expression* ListNode::at(int index)
 
 ListNode* ListNode::tail()
 {
-    if (!t())
+    if (!tail_())
     {
         error("impossible case", "tail on empty list??");
         exit(1);
     }
 
-    ListNode* x = t()->isList();
+    ListNode* x = tail_()->isList();
     if (!x)
     {
         error("impossible case", "tail can't find list");
@@ -125,8 +125,8 @@ void ListNode::print()
     if (!isNil())
     {
         // not a nil list, print elements
-        h()->print();
-        Expression* cd = t();
+        head_()->print();
+        Expression* cd = tail_();
         while (cd)
         {
             ListNode* cdl = cd->isList();

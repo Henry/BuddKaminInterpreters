@@ -11,26 +11,26 @@
 /// ExprAssign
 Expr::Expr(Expression* val)
 :
-    value(val)
+    value_(val)
 {
-    if (value)
+    if (value_)
     {
-        value->referenceCount++;
+        value_->referenceCount++;
     }
 }
 
 Expr::Expr()
 :
-    value(0)
+    value_(0)
 {}
 
 Expr::Expr(Expr& val)
 :
-    value(val.value)
+    value_(val.value_)
 {
-    if (value)
+    if (value_)
     {
-        value->referenceCount++;
+        value_->referenceCount++;
     }
 }
 
@@ -48,17 +48,17 @@ void Expr::operator=(Expression* newvalue)
     }
 
     // decrement left hand side of assignment
-    if (value)
+    if (value_)
     {
-        value->referenceCount--;
-        if (value->referenceCount == 0)
+        value_->referenceCount--;
+        if (value_->referenceCount == 0)
         {
-            delete value;
+            delete value_;
         }
     }
 
     // then do the assignment
-    value = newvalue;
+    value_ = newvalue;
 }
 ///- ExprAssign
 
@@ -67,9 +67,9 @@ void Expr::evalAndPrint(Environment* valueops, Environment* rho)
     Expr target(0);
 
     // if we have a valid expression, evaluate it
-    if (value)
+    if (value_)
     {
-        value->eval(target, valueops, rho);
+        value_->eval(target, valueops, rho);
     }
 
     // Now if we have an expression, print it out
@@ -82,9 +82,9 @@ void Expr::evalAndPrint(Environment* valueops, Environment* rho)
 #if 0
 void Expr::print()
 {
-    if (value)
+    if (value_)
     {
-        value->print();
+        value_->print();
     }
     printf("\n");
 }
@@ -184,7 +184,7 @@ Continuation* Expression::isContinuation()
 
 void IntegerExpression::print()
 {
-    printf("%d", value);
+    printf("%d", value_);
 }
 
 IntegerExpression* IntegerExpression::isInteger()
@@ -199,18 +199,18 @@ IntegerExpression* IntegerExpression::isInteger()
 Symbol::Symbol(const char* t)
 {
     // make a new copy of text
-    text = new char[strlen(t) + 1];
-    if (!text)
+    name_ = new char[strlen(t) + 1];
+    if (!name_)
     {
         error("allocation failure for symbol ", t);
         exit(1);
     }
-    strcpy(text, t);
+    strcpy(name_, t);
 }
 
 Symbol::~Symbol()
 {
-    delete[] text;
+    delete[] name_;
 }
 
 void Symbol::eval(Expr& target, Environment* valueops, Environment* rho)
@@ -222,14 +222,14 @@ void Symbol::eval(Expr& target, Environment* valueops, Environment* rho)
     }
     else
     {
-        result = error("evaluation of unknown symbol: ", text);
+        result = error("evaluation of unknown symbol: ", name_);
     }
     target = result;
 }
 
 void Symbol::print()
 {
-    printf("%s", text);
+    printf("%s", name_);
 }
 
 Symbol* Symbol::isSymbol()
@@ -248,7 +248,7 @@ int Symbol::operator==(Expression* sym) const
 
     if (s)
     {
-        return 0 == strcmp(text, s->text);
+        return 0 == strcmp(name_, s->name_);
     }
 
     return 0;
@@ -256,5 +256,5 @@ int Symbol::operator==(Expression* sym) const
 
 int Symbol::operator==(const char* t) const
 {
-    return 0 == strcmp(text, t);
+    return 0 == strcmp(name_, t);
 }

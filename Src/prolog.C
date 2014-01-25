@@ -72,7 +72,7 @@ void PrologValue::print()
     Symbol* s = isSymbol();
     if (s)
     {
-        printf("%s", s->chars());
+        printf("%s", s->name());
     }
     else
     {
@@ -109,7 +109,7 @@ void PrologValue::eval(Expr& target, Environment* valueOps, Environment* rho)
     Symbol* s = isSymbol();
     if (s)
     {
-        char* p = s->chars();
+        const char* p = s->name();
         Expression* r = rho->lookup(s);
         if (r)
         {
@@ -349,7 +349,7 @@ static int unify(PrologValue* &c, PrologValue* a, PrologValue* b)
     {
         error("impossible", "unification of non-symbols");
     }
-    else if (strcmp(as->chars(), bs->chars()) == 0)
+    else if (strcmp(as->name(), bs->name()) == 0)
     {
         return 1;
     }
@@ -443,7 +443,7 @@ int PrintContinuation::withContinuation(Continuation* future)
     Symbol* s = val()->isSymbol();
     if (s)
     {
-        printf("%s\n", s->chars());
+        printf("%s\n", s->name());
         return future->withContinuation(nothing);
     }
     return 0;

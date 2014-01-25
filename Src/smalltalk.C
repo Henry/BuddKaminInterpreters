@@ -117,7 +117,7 @@ void Object::apply(Expr& target, ListNode* args, Environment* rho)
 
     if (!meth)
     {
-        target = error("unrecognized method name: ", message->chars());
+        target = error("unrecognized method name: ", message->name());
         return;
     }
 
@@ -134,8 +134,8 @@ void Method::doMethod
     Environment* rho
 )
 {
-    // change the exectution context
-    context = ctx;
+    // Change the exectution context
+    context_ = ctx;
 
     // put self on the front of the argument list
     ListNode* newargs = new ListNode(self, args);

@@ -16,19 +16,19 @@ extern Env valueOps;
 
 QuotedConst::~QuotedConst()
 {
-    theValue = 0;
+    value_ = 0;
 }
 
 /// LispReaderImpl
 void QuotedConst::eval(Expr& target, Environment*, Environment*)
 {
-    target = theValue();
+    target = value_();
 }
 
 void QuotedConst::print()
 {
     printf("'");
-    theValue()->print();
+    value_()->print();
 }
 
 Expression* LispReader::readExpression()
@@ -173,7 +173,7 @@ void ConsFunction(Expr& target, Expression* left, Expression* right)
 /// BooleanUnaryApply
 void BooleanUnary::applyWithArgs(Expr& target, ListNode* args, Environment*)
 {
-    if (fun(args->head()))
+    if (function_(args->head()))
     {
         target = trueExpr();
     }
