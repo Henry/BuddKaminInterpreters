@@ -2,6 +2,8 @@
 
 \usepackage{a4}
 
+\newlength{\drop}
+
 \setlength{\textwidth}{5.5in}
 \setlength{\oddsidemargin}{0.77in}
 \setlength{\evensidemargin}{0in}
@@ -77,9 +79,26 @@ caption=#3]
 
 \begin{document}
 
-\title{The Kamin Interpreters in C++}
-\author{Tim Budd}
-\maketitle
+\begin{titlepage}
+    \drop=0.1\textheight
+    \centering
+    \vspace*{\baselineskip}
+    \rule{\textwidth}{1.6pt}\vspace*{-\baselineskip}\vspace*{2pt}
+    \rule{\textwidth}{0.4pt}\\[\baselineskip]
+    {\LARGE The Kamin Interpreters in C++}\\[0.2\baselineskip]
+    \rule{\textwidth}{0.4pt}\vspace*{-\baselineskip}\vspace{3.2pt}
+    \rule{\textwidth}{1.6pt}\\[\baselineskip]
+    \scshape
+    This paper describes C++ implementations of the interpreters in the book \\
+    ``Programming Languages: An Interpreter-Based Approach'' \\
+    by Samuel Kamin (Addison-Wesley, 1989).\par
+    \vspace*{2\baselineskip}
+    Timothy Budd \\
+    {\scshape September 11, 1991}  \\[\baselineskip]
+    Updated by Henry G. Weller \\
+    {\scshape \today}
+\end{titlepage}
+
 \cleardoublepage
 
 \begin{abstract}
