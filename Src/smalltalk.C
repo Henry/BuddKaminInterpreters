@@ -109,7 +109,7 @@ void Object::apply(Expr& target, ListNode* args, Environment* rho)
 
     // now see if message is a method
     Environment* meths = methods;
-    Expression* methexpr = meths->lookup(message);
+    Expression* methexpr = meths->lookup(*message);
     Method* meth = 0;
     if (methexpr)
     {
@@ -139,7 +139,7 @@ void Method::doMethod
     context_ = ctx;
 
     // put self on the front of the argument list
-    ListNode* newargs = new ListNode(self, args);
+    List newargs(new ListNode(self, args));
 
     // and execute the function
     apply(target, newargs, rho);
@@ -153,7 +153,7 @@ void Method::doMethod
 ListNode* Object::getNames()
 {
     Environment* datavals = data;
-    Expression* x = datavals->lookup(new Symbol("names"));
+    Expression* x = datavals->lookup(Symbol("names"));
     if ((!x) || (!x->isList()))
     {
         error("impossible case in Object::getNames");
@@ -168,7 +168,7 @@ Environment* Object::getMethods()
     // note that getMethods is used only on classes
 
     Environment* datavals = data;
-    Expression* x = datavals->lookup(new Symbol("methods"));
+    Expression* x = datavals->lookup(Symbol("methods"));
     if ((!x) || (!x->isEnvironment()))
     {
         error("impossible case in Object::getMethods");
@@ -468,8 +468,10 @@ void SubclassMethod::doMethod
     }
 
     // the method table is empty, but points to inherited method table
-    Environment* newmeth = new Environment(emptyList, emptyList,
-    self->getMethods());
+    Environment* newmeth
+    (
+        new Environment(emptyList, emptyList, self->getMethods())
+    );
 
     // make the new data area
     Environment* newEnv = new Environment(emptyList, emptyList, rho);

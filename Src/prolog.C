@@ -1,21 +1,31 @@
+// -----------------------------------------------------------------------------
+//  This file is part of
+/// ---     Timothy Budd's Kamin Interpreters in C++
+// -----------------------------------------------------------------------------
+/// Title: Prolog
+///  Description:
+//    The Prolog interpreter from Chapter 8
+// -----------------------------------------------------------------------------
 #include <iostream>
-
 #include "lisp.h"
 
+// -----------------------------------------------------------------------------
+/// Global declarations
+// -----------------------------------------------------------------------------
 extern Env globalEnvironment;
 extern Env commands;
 extern Env valueOps;
 extern List emptyList;
 
-//
-//      need isTrue although not used
-//
+// Need isTrue although not used
 int isTrue(Expression*)
 {
     return 0;
 }
 
+// -----------------------------------------------------------------------------
 /// PrologValue
+// -----------------------------------------------------------------------------
 class PrologValue
 :
     public Expression
@@ -66,6 +76,7 @@ public:
 };
 ///- PrologValue
 
+
 void PrologValue::print()
 {
     Symbol* s = isSymbol();
@@ -88,7 +99,10 @@ PrologValue* PrologValue::indirectPtr()
     return 0;
 }
 
+
+// -----------------------------------------------------------------------------
 /// PrologEval
+// -----------------------------------------------------------------------------
 Symbol* PrologValue::isSymbol()
 {
     PrologValue* iptr = indirectPtr();
@@ -108,7 +122,7 @@ void PrologValue::eval(Expr& target, Environment* valueOps, Environment* rho)
     Symbol* s = isSymbol();
     if (s)
     {
-        Expression* r = rho->lookup(s);
+        Expression* r = rho->lookup(*s);
         if (r)
         {
             target = r;
@@ -138,10 +152,11 @@ void PrologValue::eval(Expr& target, Environment* valueOps, Environment* rho)
 }
 ///- PrologEval
 
-//
-//      reader reads prolog symbols (no longer recognized integers either)
-//
 
+// -----------------------------------------------------------------------------
+/// PrologReader
+//    reads prolog symbols (no longer recognizes integer)
+// -----------------------------------------------------------------------------
 class PrologReader
 :
     public ReaderClass
@@ -152,48 +167,59 @@ protected:
 
 Expression* PrologReader::readExpression()
 {
-    // it might be a list
+    // It might be a list
     if (*p_ == '(')
     {
         p_++;
         return readList();
     }
-
-    // otherwise it must be a symbol
-    return new PrologValue(readSymbol());
+    else
+    {
+        // Otherwise it must be a symbol
+        return new PrologValue(readSymbol());
+    }
 }
 
-//
-//      continuations are new types of expressions
-//
+
+// -----------------------------------------------------------------------------
 /// PrologContiuation
+//    Continuations are new types of expressions
+// -----------------------------------------------------------------------------
 class Continuation
 :
     public Expression
 {
 public:
+
     virtual int withContinuation(Continuation*);
+
     virtual void print()
     {
         std::cout<< "<future>";
     }
+
     virtual Continuation* isContinuation()
     {
         return this;
     }
 };
 
-static Continuation* nothing;   // the null continuation
-
 int Continuation::withContinuation(Continuation* future)
 {
-    // default is to always work
+    // Default is to always work
     return 1;
 }
 ///- PrologContiuation
 
-// compose used in implementing and relation
+// The null continuation
+static Expr nothingExpr;
+static Continuation* nothing;
+
+
+// -----------------------------------------------------------------------------
 /// PrologComposeContinuation
+//    Compose used in implementing and relation
+// -----------------------------------------------------------------------------
 class ComposeContinuation
 :
     public Continuation
@@ -231,7 +257,10 @@ int ComposeContinuation::withContinuation(Continuation* future)
 }
 ///- PrologComposeContinuation
 
+
+// -----------------------------------------------------------------------------
 /// PrologAndContinuation
+// -----------------------------------------------------------------------------
 class AndContinuation
 :
     public Continuation
@@ -258,19 +287,25 @@ int AndContinuation::withContinuation(Continuation* future)
     ListNode* args;
     args = relArgs;
     Continuation* newrel = future;
+
     for (int i = args->length() - 1; i >= 0; i--)
     {
         newrel = new ComposeContinuation(args->at(i), newrel);
     }
 
-    Expr p(newrel);            // for gc purposes
+    // Construct an Expr for the final continuation for GC
+    Expr p(newrel);
+
     int result = newrel->withContinuation(nothing);
-    // p = 0;
+
     return result;
 }
 ///- PrologAndContinuation
 
+
+// -----------------------------------------------------------------------------
 /// PrologOrContinuation
+// -----------------------------------------------------------------------------
 class OrContinuation
 :
     public Continuation
@@ -295,7 +330,8 @@ public:
 int OrContinuation::withContinuation(Continuation* future)
 {
     ListNode* args;
-    // try each alternative in turn
+
+    // Try each alternative in turn
     for (args = relArgs; !args->isNil(); args = args->tail())
     {
         Continuation* r = args->head()->isContinuation();
@@ -309,43 +345,47 @@ int OrContinuation::withContinuation(Continuation* future)
             return 1;
         }
     }
-    // nothing worked
+
+    // Nothing worked
     return 0;
 }
 ///- PrologOrContinuation
 
+
+// -----------------------------------------------------------------------------
 /// PrologUnify
+// -----------------------------------------------------------------------------
 static int unify(PrologValue* &c, PrologValue* a, PrologValue* b)
 {
-
-    // if either one is undefined, set it to the other
+    // If either one is undefined, set it to the other
     if (a->isUndefined())
     {
         c = a;
         a->setIndirect(b);
         return 1;
     }
-    if (b->isUndefined())
+    else if (b->isUndefined())
     {
         c = b;
         b->setIndirect(a);
         return 1;
     }
 
-    // if either one are indirect, run down chain
+    // If either one are indirect, run down chain
     PrologValue* indirval;
     indirval = a->indirectPtr();
     if (indirval)
     {
         return unify(c, indirval, b);
     }
+
     indirval = b->indirectPtr();
     if (indirval)
     {
         return unify(c, a, indirval);
     }
 
-    // both must now be symbolic, work if the same
+    // Both must now be symbolic, work if the same
     c = 0;
     Symbol* as = a->isSymbol();
     Symbol* bs = b->isSymbol();
@@ -361,7 +401,10 @@ static int unify(PrologValue* &c, PrologValue* a, PrologValue* b)
 }
 ///- PrologUnify
 
+
+// -----------------------------------------------------------------------------
 /// PrologUnifyContinuation
+// -----------------------------------------------------------------------------
 class UnifyContinuation
 :
     public Continuation
@@ -391,21 +434,21 @@ int UnifyContinuation::withContinuation(Continuation* future)
     PrologValue* a = left()->isPrologValue();
     PrologValue* b = right()->isPrologValue();
 
-    // the following shouldn't ever happen, but check anyway
+    // The following shouldn't ever happen, but check anyway
     if ((!a) || (!b))
     {
         error("impossible", "missing prolog values in unification");
         return 0;
     }
 
-    // now try unification
+    // Now try unification
     PrologValue* c = 0;
     if (unify(c, a, b) && future->withContinuation(nothing))
     {
         return 1;
     }
 
-    // didn't work, undo assignment and fail
+    // Didn't work, undo assignment and fail
     if (c)
     {
         c->setUndefined();
@@ -415,11 +458,11 @@ int UnifyContinuation::withContinuation(Continuation* future)
 }
 ///- PrologUnifyContinuation
 
-//
-//      the printing relation
-//
 
+// -----------------------------------------------------------------------------
 /// PrologPrintContinuation
+//    The printing relation
+// -----------------------------------------------------------------------------
 class PrintContinuation
 :
     public Continuation
@@ -443,7 +486,7 @@ public:
 
 int PrintContinuation::withContinuation(Continuation* future)
 {
-    // see if we are a symbol, if so print it out
+    // See if we are a symbol, if so print it out
     Symbol* s = val()->isSymbol();
     if (s)
     {
@@ -454,11 +497,11 @@ int PrintContinuation::withContinuation(Continuation* future)
 }
 ///- PrologPrintContinuation
 
-//
-//      the operations used when reading rules
-//
 
+// -----------------------------------------------------------------------------
 /// PrologUnifyOperation
+//    The operations used when reading rules
+// -----------------------------------------------------------------------------
 class UnifyOperation
 :
     public BinaryFunction
@@ -505,11 +548,11 @@ public:
 };
 ///- PrologUnifyOperation
 
-//
-//      the query statement is used to ask questions
-//
 
+// -----------------------------------------------------------------------------
 /// PrologQueryStatement
+//    The query statement is used to ask questions
+// -----------------------------------------------------------------------------
 class QueryStatement
 :
     public Function
@@ -526,7 +569,7 @@ void QueryStatement::apply(Expr& target, ListNode* args, Environment* rho)
         return;
     }
 
-    // we make a new environment to isolate any new variables defined
+    // We make a new environment to isolate any new variables defined
     Env newrho(new Environment(emptyList, emptyList, rho));
 
     args->at(0)->eval(target, valueOps, newrho);
@@ -554,23 +597,27 @@ void QueryStatement::apply(Expr& target, ListNode* args, Environment* rho)
 }
 ///- PrologQueryStatement
 
+
+// -----------------------------------------------------------------------------
 /// PrologInitialize
+// -----------------------------------------------------------------------------
 ReaderClass* initialize()
 {
-    // create the reader/parser
+    // Create the reader/parser
     ReaderClass* reader = new PrologReader;
 
-    // make the empty relation
+    // Construct the "nothing" continuation
     nothing = new Continuation;
+    nothingExpr = nothing;
 
-    // make the operators that are legal inside of relations
+    // Construct the operators that are legal inside of relations
     Environment* rops = valueOps;
     rops->add(new Symbol("print"), new PrintOperation);
     rops->add(new Symbol(":=:"), new UnifyOperation);
     rops->add(new Symbol("and"), new AndOperation);
     rops->add(new Symbol("or"), new OrOperation);
 
-    // initialize the commands environment
+    // Initialize the commands environment
     Environment* cmds = commands;
     cmds->add(new Symbol("define"), new DefineStatement);
     cmds->add(new Symbol("query"), new QueryStatement);
@@ -578,3 +625,5 @@ ReaderClass* initialize()
     return reader;
 }
 ///- PrologInitialize
+
+// -----------------------------------------------------------------------------

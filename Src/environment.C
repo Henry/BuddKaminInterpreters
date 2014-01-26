@@ -63,14 +63,14 @@ void Environment::set(Symbol* sym, Expression* value)
 ///- EnvironmentAdd
 
 /// EnvironmentLookup
-Expression* Environment::lookup(const Symbol* sym)
+Expression* Environment::lookup(const Symbol& sym)
 {
     ListNode* nameit = names_;
     ListNode* valueit = values_;
 
     while (!nameit->isNil())
     {
-        if (*sym == nameit->head())
+        if (sym == nameit->head())
         {
             return valueit->head();
         }

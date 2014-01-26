@@ -133,7 +133,7 @@ void Selector::applyWithArgs(Expr& target, ListNode* args, Environment* rho)
     {
         error("impossible case in selector, no symbol");
     }
-    target = x->lookup(s);
+    target = x->lookup(*s);
     if (!target())
     {
         error("selector cannot find symbol:", s->name());
@@ -287,7 +287,7 @@ void ClusterDef::apply(Expr& target, ListNode* args, Environment* rho)
             name,
             "$",
             s,
-            inEnv->lookup(s)
+            inEnv->lookup(*s)
         );
 
         // Get next function

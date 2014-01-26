@@ -15,8 +15,12 @@ int isTrue(Expression* cond)
 {
     // the only thing false is nil
     ListNode* nval = cond->isList();
+
     if (nval && nval->isNil())
+    {
         return 0;
+    }
+
     return 1;
 }
 ///- LispIsTrue
@@ -24,24 +28,24 @@ int isTrue(Expression* cond)
 /// LispInitialize
 ReaderClass* initialize()
 {
-
-    // create the reader/parser
+    // Create the reader/parser
     ReaderClass* reader = new LispReader;
 
-    // initialize the global environment
+    // Initialize the global environment
     Symbol* truesym = new Symbol("T");
     trueExpr = truesym;
     falseExpr = emptyList();
     Environment* genv = globalEnvironment;
+
     // make T evaluate to T always
     genv->add(truesym, truesym);
     genv->add(new Symbol("nil"), emptyList());
 
-    // initialize the commands environment
+    // Initialize the commands environment
     Environment* cmds = commands;
     cmds->add(new Symbol("define"), new DefineStatement);
 
-    // initialize the value-ops environment
+    // Initialize the value-ops environment
     Environment* vo = valueOps;
     vo->add(new Symbol("if"), new IfStatement);
     vo->add(new Symbol("while"), new WhileStatement);

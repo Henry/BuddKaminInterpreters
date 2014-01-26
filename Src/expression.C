@@ -204,7 +204,7 @@ Symbol::~Symbol()
 
 void Symbol::eval(Expr& target, Environment* valueops, Environment* rho)
 {
-    Expression* result = rho->lookup(this);
+    Expression* result = rho->lookup(*this);
     if (result)
     {
         result = result->touch();

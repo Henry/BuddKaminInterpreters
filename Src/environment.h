@@ -57,8 +57,8 @@ public:
     //- Specialised type predicate
     virtual Environment* isEnvironment();
 
-    //- Lookup symbol in
-    Expression* lookup(const Symbol*);
+    //- Lookup symbol
+    Expression* lookup(const Symbol&);
 
     //- Add symbol with expression to the environment
     void add(Symbol*, Expression*);

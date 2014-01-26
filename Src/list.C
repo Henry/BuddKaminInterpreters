@@ -90,7 +90,7 @@ void ListNode::eval(Expr& target, Environment* valueops, Environment* rho)
     const Symbol* name = firstarg->isSymbol();
     if (name)
     {
-        fun = valueops->lookup(name);
+        fun = valueops->lookup(*name);
     }
 
     // otherwise evaluate it in the given environment
