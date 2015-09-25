@@ -1,5 +1,4 @@
 #                            -*- mode: org; -*-
-#
 #+TITLE: *Timothy Budd's Kamin Interpreters in C++*
 #+AUTHOR: nil
 #+OPTIONS: author:nil email:nil ^:{}
